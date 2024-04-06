@@ -4,7 +4,6 @@ import (
 	"day00/internal/input"
 	"day00/internal/statistics"
 	"fmt"
-	"os"
 )
 
 func Run() {
@@ -14,7 +13,7 @@ func Run() {
 	numbers := input.ScanNumbers()
 
 	if len(numbers) == 0 {
-		fmt.Fprintln(os.Stderr, "Error: empty input")
+		fmt.Println("Error: empty input")
 	} else {
 		statistics.GetStatistics(numbers, flags)
 	}

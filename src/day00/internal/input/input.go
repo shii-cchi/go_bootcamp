@@ -3,7 +3,6 @@ package input
 import (
 	"fmt"
 	"io"
-	"os"
 	"strconv"
 )
 
@@ -22,19 +21,19 @@ func ScanNumbers() []int {
 		}
 
 		if err != nil {
-			fmt.Fprintln(os.Stderr, "Error: empty input string")
+			fmt.Println("Error: empty input string")
 			continue
 		}
 
 		number, err := strconv.Atoi(input)
 
 		if err != nil {
-			fmt.Fprintln(os.Stderr, "Error: input should be an integer")
+			fmt.Println("Error: input should be an integer")
 			continue
 		}
 
 		if number > maxNumber || number < -maxNumber {
-			fmt.Fprintln(os.Stderr, "Error: input number out of range")
+			fmt.Println("Error: input number out of range")
 			continue
 		}
 
