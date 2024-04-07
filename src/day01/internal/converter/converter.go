@@ -1,14 +1,14 @@
 package converter
 
 import (
-	"day01/internal/reader"
+	"day01/internal/dbreader"
 	"encoding/json"
 	"encoding/xml"
 	"errors"
 	"path/filepath"
 )
 
-func Convert(recipes reader.Recipes, dbFilename string) ([]byte, error) {
+func Convert(recipes dbreader.Recipes, dbFilename string) ([]byte, error) {
 	extension := filepath.Ext(dbFilename)
 
 	switch extension {
@@ -21,7 +21,7 @@ func Convert(recipes reader.Recipes, dbFilename string) ([]byte, error) {
 	}
 }
 
-func convertToXML(recipes reader.Recipes) ([]byte, error) {
+func convertToXML(recipes dbreader.Recipes) ([]byte, error) {
 	xmlData, err := xml.MarshalIndent(recipes, "", "  ")
 
 	if err != nil {
@@ -31,7 +31,7 @@ func convertToXML(recipes reader.Recipes) ([]byte, error) {
 	return xmlData, nil
 }
 
-func convertToJSON(recipes reader.Recipes) ([]byte, error) {
+func convertToJSON(recipes dbreader.Recipes) ([]byte, error) {
 	jsonData, err := json.MarshalIndent(recipes, "", "  ")
 	if err != nil {
 		return nil, err

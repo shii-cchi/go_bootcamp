@@ -1,4 +1,4 @@
-package reader
+package dbreader
 
 import (
 	"encoding/json"
