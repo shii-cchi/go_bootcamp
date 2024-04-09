@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 )
 
-func Find(path string, findFlags options.FindOptions) {
+func Find(path string, findFlags options.FindOptions) error {
 	err := filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			if os.IsPermission(err) {
@@ -35,10 +35,7 @@ func Find(path string, findFlags options.FindOptions) {
 		return nil
 	})
 
-	if err != nil {
-		fmt.Printf("Error while searching in directory %q: %v\n", path, err)
-		os.Exit(1)
-	}
+	return fmt.Errorf("Error while searching in directory %q: %v", path, err)
 }
 
 func isRegularFile(info os.FileInfo) bool {
