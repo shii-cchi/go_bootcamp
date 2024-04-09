@@ -14,7 +14,7 @@ build_ex02:
 	go build -o myXargs cmd/runner/main.go
 
 .PHONY: build_ex03
-build_ex02:
+build_ex03:
 	go build -o myRotate cmd/fscomparer/main.go
 
 .PHONY: clean
