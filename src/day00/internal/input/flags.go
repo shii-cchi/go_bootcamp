@@ -10,20 +10,16 @@ type OutputOptions struct {
 }
 
 func SetupOutputOptions(flags *OutputOptions) {
-	defineFlags(flags)
+	flag.BoolVar(&flags.Mean, "mean", false, "Print mean")
+	flag.BoolVar(&flags.Median, "median", false, "Print median")
+	flag.BoolVar(&flags.Mode, "mode", false, "Print mode")
+	flag.BoolVar(&flags.StandardDeviation, "sd", false, "Print standard deviation")
 
 	flag.Parse()
 
 	if allFlagsAreFalse(*flags) {
 		setAllFlagsTrue(flags)
 	}
-}
-
-func defineFlags(flags *OutputOptions) {
-	flag.BoolVar(&flags.Mean, "mean", false, "Print mean")
-	flag.BoolVar(&flags.Median, "median", false, "Print median")
-	flag.BoolVar(&flags.Mode, "mode", false, "Print mode")
-	flag.BoolVar(&flags.StandardDeviation, "sd", false, "Print standard deviation")
 }
 
 func allFlagsAreFalse(flags OutputOptions) bool {

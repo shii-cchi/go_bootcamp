@@ -9,23 +9,23 @@ import (
 
 func GetStatistics(numbers []int, flags input.OutputOptions) {
 	if flags.Mean {
-		fmt.Printf("Mean: %.2f\n", GetMean(numbers))
+		fmt.Printf("Mean: %.2f\n", getMean(numbers))
 	}
 
 	if flags.Median {
-		fmt.Printf("Median: %.2f\n", GetMedian(numbers))
+		fmt.Printf("Median: %.2f\n", getMedian(numbers))
 	}
 
 	if flags.Mode {
-		fmt.Printf("Mode: %d\n", GetMode(numbers))
+		fmt.Printf("Mode: %d\n", getMode(numbers))
 	}
 
 	if flags.StandardDeviation {
-		fmt.Printf("Standard Deviation: %.2f\n", GetSD(numbers))
+		fmt.Printf("Standard Deviation: %.2f\n", getSD(numbers))
 	}
 }
 
-func GetMean(numbers []int) float64 {
+func getMean(numbers []int) float64 {
 	sum := 0
 
 	for _, num := range numbers {
@@ -36,7 +36,7 @@ func GetMean(numbers []int) float64 {
 	return average
 }
 
-func GetMedian(numbers []int) float64 {
+func getMedian(numbers []int) float64 {
 	sort.Ints(numbers)
 
 	if len(numbers)%2 == 0 {
@@ -46,7 +46,7 @@ func GetMedian(numbers []int) float64 {
 	}
 }
 
-func GetMode(numbers []int) int {
+func getMode(numbers []int) int {
 	frequency := make(map[int]int)
 
 	for _, number := range numbers {
@@ -66,8 +66,8 @@ func GetMode(numbers []int) int {
 	return mode
 }
 
-func GetSD(numbers []int) float64 {
-	mean := GetMean(numbers)
+func getSD(numbers []int) float64 {
+	mean := getMean(numbers)
 
 	var sumSquaredDeviations float64
 
