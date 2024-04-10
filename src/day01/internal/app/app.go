@@ -5,20 +5,20 @@ import (
 	"day01/internal/dbcomparer"
 	"day01/internal/dbreader"
 	"day01/internal/fscomparer"
-	"flag"
+	"day01/internal/input"
 	"fmt"
 	"os"
 )
 
 func RunDBReader() {
-	dbFilename := getDbFilenameForRead()
+	dbFilename := input.GetDbFilenameForRead()
 
 	if dbFilename == "" {
 		fmt.Println("Error: no filename provided")
 		return
 	}
 
-	recipes, err := getDataFromDB(dbFilename)
+	recipes, err := dbreader.GetDataFromDB(dbFilename)
 
 	if err != nil {
 		fmt.Println("Error:", err)
@@ -36,21 +36,21 @@ func RunDBReader() {
 }
 
 func RunDBComparer() {
-	oldDBFilename, newDBFilename := getDbFilenamesForCompare()
+	oldDBFilename, newDBFilename := input.GetDbFilenamesForCompare()
 
 	if oldDBFilename == "" || newDBFilename == "" {
 		fmt.Println("Error: no filenames provided")
 		return
 	}
 
-	oldData, err := getDataFromDB(oldDBFilename)
+	oldData, err := dbreader.GetDataFromDB(oldDBFilename)
 
 	if err != nil {
 		fmt.Println("Error:", err)
 		return
 	}
 
-	newData, err := getDataFromDB(newDBFilename)
+	newData, err := dbreader.GetDataFromDB(newDBFilename)
 
 	if err != nil {
 		fmt.Println("Error:", err)
@@ -61,7 +61,7 @@ func RunDBComparer() {
 }
 
 func RunFSComparer() {
-	oldDumpFilename, newDumpFilename := getDumpsFilenames()
+	oldDumpFilename, newDumpFilename := input.GetDumpsFilenames()
 
 	if oldDumpFilename == "" || newDumpFilename == "" {
 		fmt.Println("Error: no filenames provided")
@@ -83,51 +83,4 @@ func RunFSComparer() {
 	defer newDump.Close()
 
 	fscomparer.Compare(oldDump, newDump)
-}
-
-func getDbFilenameForRead() string {
-	var dbFilename string
-
-	flag.StringVar(&dbFilename, "f", "", "Specifies the filename of the database")
-	flag.Parse()
-
-	return dbFilename
-}
-
-func getDbFilenamesForCompare() (string, string) {
-	var oldDBFilename string
-	var newDBFilename string
-
-	flag.StringVar(&oldDBFilename, "old", "", "Specifies the filename of the old database")
-	flag.StringVar(&newDBFilename, "new", "", "Specifies the filename of the new database")
-	flag.Parse()
-
-	return oldDBFilename, newDBFilename
-}
-
-func getDataFromDB(dbFilename string) (dbreader.Recipes, error) {
-	dbReader, err := dbreader.NewDBReader(dbFilename)
-
-	if err != nil {
-		return dbreader.Recipes{}, err
-	}
-
-	recipes, err := dbReader.Read(dbFilename)
-
-	if err != nil {
-		return dbreader.Recipes{}, err
-	}
-
-	return recipes, nil
-}
-
-func getDumpsFilenames() (string, string) {
-	var oldDumpFilename string
-	var newDumpFilename string
-
-	flag.StringVar(&oldDumpFilename, "old", "", "Specifies the filename of the old filesystem dump")
-	flag.StringVar(&newDumpFilename, "new", "", "Specifies the filename of the new filesystem dump")
-	flag.Parse()
-
-	return oldDumpFilename, newDumpFilename
 }

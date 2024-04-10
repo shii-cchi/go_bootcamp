@@ -68,3 +68,19 @@ func (r XmlDBReader) Read(dbFilename string) (Recipes, error) {
 
 	return recipes, nil
 }
+
+func GetDataFromDB(dbFilename string) (Recipes, error) {
+	dbReader, err := NewDBReader(dbFilename)
+
+	if err != nil {
+		return Recipes{}, err
+	}
+
+	recipes, err := dbReader.Read(dbFilename)
+
+	if err != nil {
+		return Recipes{}, err
+	}
+
+	return recipes, nil
+}
