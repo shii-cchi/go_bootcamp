@@ -30,10 +30,8 @@ func Archive(dir string, paths []string) error {
 		}(path, dir)
 	}
 
-	go func() {
-		wg.Wait()
-		close(errCh)
-	}()
+	wg.Wait()
+	close(errCh)
 
 	var errs []error
 	for err := range errCh {

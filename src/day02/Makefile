@@ -15,7 +15,7 @@ build_ex02:
 
 .PHONY: build_ex03
 build_ex03:
-	go build -o myRotate cmd/fscomparer/main.go
+	go build -o myRotate cmd/archiver/main.go
 
 .PHONY: clean
 clean:

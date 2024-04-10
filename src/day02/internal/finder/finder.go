@@ -12,7 +12,6 @@ func Find(path string, findFlags options.FindOptions) error {
 	err := filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			if os.IsPermission(err) {
-				fmt.Printf("Skipping file or directory due to permission error: %v\n", err)
 				return filepath.SkipDir
 			}
 
@@ -35,7 +34,11 @@ func Find(path string, findFlags options.FindOptions) error {
 		return nil
 	})
 
-	return fmt.Errorf("Error while searching in directory %q: %v", path, err)
+	if err != nil {
+		return fmt.Errorf("Error while searching in directory %q: %v", path, err)
+	}
+
+	return nil
 }
 
 func isRegularFile(info os.FileInfo) bool {
