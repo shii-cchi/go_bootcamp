@@ -22,7 +22,7 @@ import (
 )
 
 func CreateIndexAndUploadData(cfg *config.Config) {
-	es := makeNewEsClient(cfg.EsClientAddress)
+	es := MakeNewEsClient(cfg.EsClientAddress)
 
 	mappingsJSON := db.GetMappingSchema(cfg.MappingSchemaFile)
 
@@ -31,7 +31,7 @@ func CreateIndexAndUploadData(cfg *config.Config) {
 	uploadData(es, cfg.DbFile, cfg.UserName, cfg.UserPassword)
 }
 
-func makeNewEsClient(esClientAddress string) *elasticsearch.Client {
+func MakeNewEsClient(esClientAddress string) *elasticsearch.Client {
 	cfg := elasticsearch.Config{
 		Addresses: []string{esClientAddress},
 		Transport: &http.Transport{
