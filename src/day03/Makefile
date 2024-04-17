@@ -3,7 +3,7 @@ all: build
 
 .PHONY: build
 build:
-	go build cmd/main.go
+	go build cmd/ex00/main.go
 
 .PHONY: clean
 clean:
