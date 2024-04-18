@@ -1,7 +1,6 @@
 package db
 
 import (
-	"day03/internal/es_utils"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -32,7 +31,12 @@ func (es *EsStore) GetPlaces(limit int, offset int) ([]Place, int, error) {
 	defer res.Body.Close()
 
 	if res.IsError() {
-		return nil, 0, fmt.Errorf("Error: %s", es_utils.MakeErrorResponse(res))
+		var errorResponse map[string]interface{}
+		if err := json.NewDecoder(res.Body).Decode(&errorResponse); err != nil {
+			return nil, 0, fmt.Errorf("Error parsing the error response body: %s", err)
+		}
+
+		return nil, 0, fmt.Errorf("Error: %s: %s", res.Status(), errorResponse["error"].(map[string]interface{})["reason"])
 	}
 
 	var result map[string]interface{}

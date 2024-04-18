@@ -2,7 +2,7 @@ package handlers
 
 import "day03/internal/db"
 
-const limit = 12
+const limit = 10
 
 const htmlTemplate = `<!doctype html>
 <html>
@@ -39,4 +39,13 @@ type HTMLData struct {
 	Last        int
 	IsFirstPage bool
 	IsLastPage  bool
+}
+
+type JSONData struct {
+	Name   string     `json:"name"`
+	Total  int        `json:"total"`
+	Places []db.Place `json:"places"`
+	Prev   *int       `json:"prev_page,omitempty"`
+	Next   *int       `json:"next_page,omitempty"`
+	Last   int        `json:"last_page"`
 }

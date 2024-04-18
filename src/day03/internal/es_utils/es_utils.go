@@ -19,6 +19,16 @@ import (
 	"strings"
 )
 
+func CreateIndexAndUploadData() {
+	es := MakeNewEsClient()
+
+	mappingsJSON := getMappingSchema()
+
+	createIndex(es, mappingsJSON)
+
+	uploadData(es)
+}
+
 func MakeNewEsClient() *elasticsearch.Client {
 	cfg := elasticsearch.Config{
 		Addresses: []string{"https://localhost:9200"},
@@ -36,7 +46,31 @@ func MakeNewEsClient() *elasticsearch.Client {
 	return es
 }
 
-func CreateIndex(es *elasticsearch.Client, mappingsJSON []byte) {
+func getMappingSchema() []byte {
+	file, err := os.Open("schema.json")
+
+	if err != nil {
+		log.Fatalf("Error opening schema.json file: %s", err)
+	}
+
+	defer file.Close()
+
+	var mappings map[string]interface{}
+
+	if err := json.NewDecoder(file).Decode(&mappings); err != nil {
+		log.Fatalf("Error decoding schema.json: %s", err)
+	}
+
+	mappingsJSON, err := json.Marshal(mappings)
+
+	if err != nil {
+		log.Fatalf("Error marshaling the mappings: %s", err)
+	}
+
+	return mappingsJSON
+}
+
+func createIndex(es *elasticsearch.Client, mappingsJSON []byte) {
 	req := prepareCreateIndexRequest(mappingsJSON)
 
 	res, err := req.Do(context.Background(), es)
@@ -48,7 +82,7 @@ func CreateIndex(es *elasticsearch.Client, mappingsJSON []byte) {
 	defer res.Body.Close()
 
 	if res.IsError() {
-		log.Fatalf("Error: %s", MakeErrorResponse(res))
+		log.Fatalf("Error: %s", makeErrorResponse(res))
 	}
 
 	log.Printf("Index places created successfully")
@@ -71,7 +105,7 @@ func prepareCreateIndexRequest(mappingsJSON []byte) *esapi.IndicesCreateRequest 
 	return &req
 }
 
-func MakeErrorResponse(res *esapi.Response) error {
+func makeErrorResponse(res *esapi.Response) error {
 	var errorResponse map[string]interface{}
 	if err := json.NewDecoder(res.Body).Decode(&errorResponse); err != nil {
 		return fmt.Errorf("Error parsing the error response body: %s", err)
@@ -79,7 +113,7 @@ func MakeErrorResponse(res *esapi.Response) error {
 	return fmt.Errorf("Error: %s: %s", res.Status(), errorResponse["error"].(map[string]interface{})["reason"])
 }
 
-func UploadData(es *elasticsearch.Client) {
+func uploadData(es *elasticsearch.Client) {
 	file, err := os.Open("data.csv")
 
 	if err != nil {
@@ -101,7 +135,7 @@ func UploadData(es *elasticsearch.Client) {
 	defer res.Body.Close()
 
 	if res.IsError() {
-		log.Fatalf("Error: %s", MakeErrorResponse(res))
+		log.Fatalf("Error: %s", makeErrorResponse(res))
 	}
 
 	log.Println("Bulk request executed successfully")
@@ -181,4 +215,39 @@ func prepareBulkRequest(buf bytes.Buffer) *esapi.BulkRequest {
 	req.Header.Set("Authorization", auth)
 
 	return &req
+}
+
+type CountResponse struct {
+	Count int `json:"count"`
+}
+
+func GetIndexDocCount(indexName string) (int, error) {
+	url := fmt.Sprintf("https://localhost:9200/%s/_count", indexName)
+
+	transport := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+
+	client := &http.Client{Transport: transport}
+
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return 0, err
+	}
+
+	req.SetBasicAuth("umaradri", "123123")
+
+	res, err := client.Do(req)
+	if err != nil {
+		return 0, err
+	}
+	defer res.Body.Close()
+
+	var countResponse CountResponse
+	err = json.NewDecoder(res.Body).Decode(&countResponse)
+	if err != nil {
+		return 0, err
+	}
+
+	return countResponse.Count, nil
 }

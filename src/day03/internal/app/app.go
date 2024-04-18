@@ -9,17 +9,15 @@ import (
 )
 
 func RunCreateIndexAndUploadData() {
-	es := es_utils.MakeNewEsClient()
-
-	mappingsJSON := db.GetMappingSchema()
-
-	es_utils.CreateIndex(es, mappingsJSON)
-
-	es_utils.UploadData(es)
+	es_utils.CreateIndexAndUploadData()
 }
 
 func RunServer() {
-	http.HandleFunc("/", handlers.GetAllPlacesHandler)
+	client := es_utils.MakeNewEsClient()
+	store := db.NewEsStore(client)
+
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) { handlers.GetAllPlacesHandlerHTML(w, r, store) })
+	http.HandleFunc("/api/places", func(w http.ResponseWriter, r *http.Request) { handlers.GetAllPlacesHandlerJSON(w, r, store) })
 
 	log.Fatal(http.ListenAndServe(":8888", nil))
 }
