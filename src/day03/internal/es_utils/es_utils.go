@@ -5,9 +5,7 @@ import (
 	"bytes"
 	"context"
 	"crypto/tls"
-	"day03/internal/config"
 	"day03/internal/db"
-	"day03/internal/models"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -21,19 +19,9 @@ import (
 	"strings"
 )
 
-func CreateIndexAndUploadData(cfg *config.Config) {
-	es := MakeNewEsClient(cfg.EsClientAddress)
-
-	mappingsJSON := db.GetMappingSchema(cfg.MappingSchemaFile)
-
-	createIndex(es, mappingsJSON, cfg.UserName, cfg.UserPassword)
-
-	uploadData(es, cfg.DbFile, cfg.UserName, cfg.UserPassword)
-}
-
-func MakeNewEsClient(esClientAddress string) *elasticsearch.Client {
+func MakeNewEsClient() *elasticsearch.Client {
 	cfg := elasticsearch.Config{
-		Addresses: []string{esClientAddress},
+		Addresses: []string{"https://localhost:9200"},
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 		},
@@ -48,8 +36,8 @@ func MakeNewEsClient(esClientAddress string) *elasticsearch.Client {
 	return es
 }
 
-func createIndex(es *elasticsearch.Client, mappingsJSON []byte, userName, userPassword string) {
-	req := prepareCreateIndexRequest(mappingsJSON, userName, userPassword)
+func CreateIndex(es *elasticsearch.Client, mappingsJSON []byte) {
+	req := prepareCreateIndexRequest(mappingsJSON)
 
 	res, err := req.Do(context.Background(), es)
 
@@ -60,19 +48,19 @@ func createIndex(es *elasticsearch.Client, mappingsJSON []byte, userName, userPa
 	defer res.Body.Close()
 
 	if res.IsError() {
-		makeErrorResponse(res)
+		log.Fatalf("Error: %s", MakeErrorResponse(res))
 	}
 
 	log.Printf("Index places created successfully")
 }
 
-func prepareCreateIndexRequest(mappingsJSON []byte, userName, userPassword string) *esapi.IndicesCreateRequest {
+func prepareCreateIndexRequest(mappingsJSON []byte) *esapi.IndicesCreateRequest {
 	req := esapi.IndicesCreateRequest{
 		Index: "places",
 		Body:  strings.NewReader(string(mappingsJSON)),
 	}
 
-	auth := "Basic " + base64.StdEncoding.EncodeToString([]byte(userName+":"+userPassword))
+	auth := "Basic " + base64.StdEncoding.EncodeToString([]byte("umaradri:123123"))
 
 	if req.Header == nil {
 		req.Header = make(http.Header)
@@ -83,27 +71,26 @@ func prepareCreateIndexRequest(mappingsJSON []byte, userName, userPassword strin
 	return &req
 }
 
-func makeErrorResponse(res *esapi.Response) {
+func MakeErrorResponse(res *esapi.Response) error {
 	var errorResponse map[string]interface{}
 	if err := json.NewDecoder(res.Body).Decode(&errorResponse); err != nil {
-		log.Fatalf("Error parsing the error response body: %s", err)
+		return fmt.Errorf("Error parsing the error response body: %s", err)
 	}
-
-	log.Fatalf("Error creating the index: %s: %s", res.Status(), errorResponse["error"].(map[string]interface{})["reason"])
+	return fmt.Errorf("Error: %s: %s", res.Status(), errorResponse["error"].(map[string]interface{})["reason"])
 }
 
-func uploadData(es *elasticsearch.Client, dbFile, userName, userPassword string) {
-	file, err := os.Open(dbFile)
+func UploadData(es *elasticsearch.Client) {
+	file, err := os.Open("data.csv")
 
 	if err != nil {
-		log.Fatalf("Error opening %s file: %s", dbFile, err)
+		log.Fatalf("Error opening data.csv file: %s", err)
 	}
 
 	defer file.Close()
 
-	buf := makeRequestBody(file)
+	buf := makeBulkRequestBody(file)
 
-	req := prepareBulkRequest(buf, userName, userPassword)
+	req := prepareBulkRequest(buf)
 
 	res, err := req.Do(context.Background(), es)
 
@@ -114,13 +101,13 @@ func uploadData(es *elasticsearch.Client, dbFile, userName, userPassword string)
 	defer res.Body.Close()
 
 	if res.IsError() {
-		log.Fatalf("Error response received from Elasticsearch: %s", res.String())
+		log.Fatalf("Error: %s", MakeErrorResponse(res))
 	}
 
 	log.Println("Bulk request executed successfully")
 }
 
-func makeRequestBody(file io.Reader) bytes.Buffer {
+func makeBulkRequestBody(file io.Reader) bytes.Buffer {
 	scanner := bufio.NewScanner(file)
 
 	scanner.Scan()
@@ -145,7 +132,7 @@ func makeRequestBody(file io.Reader) bytes.Buffer {
 			log.Fatalf("Error parsing longitude: %s", err)
 		}
 
-		place := models.Place{
+		place := db.Place{
 			ID:      id,
 			Name:    fields[1],
 			Address: fields[2],
@@ -180,12 +167,12 @@ func makeRequestBody(file io.Reader) bytes.Buffer {
 	return buf
 }
 
-func prepareBulkRequest(buf bytes.Buffer, userName, userPassword string) *esapi.BulkRequest {
+func prepareBulkRequest(buf bytes.Buffer) *esapi.BulkRequest {
 	req := esapi.BulkRequest{
 		Body: &buf,
 	}
 
-	auth := "Basic " + base64.StdEncoding.EncodeToString([]byte(userName+":"+userPassword))
+	auth := "Basic " + base64.StdEncoding.EncodeToString([]byte("umaradri:123123"))
 
 	if req.Header == nil {
 		req.Header = make(http.Header)

@@ -1,4 +1,4 @@
-package models
+package db
 
 type Place struct {
 	ID       int      `json:"id"`

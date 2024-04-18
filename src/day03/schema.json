@@ -14,10 +14,5 @@
         "type": "geo_point"
       }
     }
-  },
-  "settings": {
-    "index": {
-      "max_result_window": 20000
-    }
   }
 }
