@@ -154,13 +154,13 @@ func makeBulkRequestBody(file io.Reader) bytes.Buffer {
 		line := scanner.Text()
 		fields := strings.Split(line, "\t")
 
-		lat, err := strconv.ParseFloat(fields[4], 64)
+		lat, err := strconv.ParseFloat(fields[5], 64)
 
 		if err != nil {
 			log.Fatalf("Error parsing latitude: %s", err)
 		}
 
-		lon, err := strconv.ParseFloat(fields[5], 64)
+		lon, err := strconv.ParseFloat(fields[4], 64)
 
 		if err != nil {
 			log.Fatalf("Error parsing longitude: %s", err)

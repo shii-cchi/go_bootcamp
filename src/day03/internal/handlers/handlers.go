@@ -11,7 +11,7 @@ import (
 	"strconv"
 )
 
-func GetAllPlacesHandlerHTML(w http.ResponseWriter, r *http.Request, store db.Store) {
+func GetAllPlacesHTMLHandler(w http.ResponseWriter, r *http.Request, store db.Store) {
 	page, err := getPageParam(r)
 
 	if err != nil {
@@ -19,9 +19,9 @@ func GetAllPlacesHandlerHTML(w http.ResponseWriter, r *http.Request, store db.St
 		return
 	}
 
-	offset := (page - 1) * limit
+	offset := (page - 1) * resultsPerPage
 
-	places, total, err := store.GetPlaces(limit, offset)
+	places, total, err := store.GetPlaces(resultsPerPage, offset)
 
 	if err != nil {
 		if err.Error() == "Error: 400 Bad Request: all shards failed" {
@@ -33,7 +33,7 @@ func GetAllPlacesHandlerHTML(w http.ResponseWriter, r *http.Request, store db.St
 		return
 	}
 
-	data := prepareHTMLData(page, total, limit, places)
+	data := prepareHTMLData(page, total, resultsPerPage, places)
 
 	tmpl, err := template.New("index").Parse(htmlTemplate)
 
@@ -59,7 +59,7 @@ func getPageParam(r *http.Request) (int, error) {
 
 	maxDoc, err := es_utils.GetIndexDocCount("places")
 
-	maxPage := int(math.Ceil(float64(maxDoc) / float64(limit)))
+	maxPage := int(math.Ceil(float64(maxDoc) / float64(resultsPerPage)))
 
 	if err != nil || page < 1 || page > maxPage {
 		return 0, fmt.Errorf("Invalid 'page' value: '%s'", pageStr)
@@ -87,7 +87,7 @@ func prepareHTMLData(page, total, limit int, places []db.Place) HTMLData {
 	}
 }
 
-func GetAllPlacesHandlerJSON(w http.ResponseWriter, r *http.Request, store db.Store) {
+func GetAllPlacesJSONHandler(w http.ResponseWriter, r *http.Request, store db.Store) {
 	page, err := getPageParam(r)
 
 	if err != nil {
@@ -95,11 +95,9 @@ func GetAllPlacesHandlerJSON(w http.ResponseWriter, r *http.Request, store db.St
 		return
 	}
 
-	offset := (page - 1) * limit
+	offset := (page - 1) * resultsPerPage
 
-	places, total, err := store.GetPlaces(limit, offset)
-
-	fmt.Println(err)
+	places, total, err := store.GetPlaces(resultsPerPage, offset)
 
 	if err != nil {
 		if err.Error() == "Error: 400 Bad Request: all shards failed" {
@@ -111,7 +109,7 @@ func GetAllPlacesHandlerJSON(w http.ResponseWriter, r *http.Request, store db.St
 		return
 	}
 
-	data := prepareJSONData(page, total, limit, places)
+	data := prepareJSONData(page, total, resultsPerPage, places)
 
 	respondWithJSON(w, http.StatusOK, data)
 }
@@ -141,4 +139,50 @@ func prepareJSONData(page, total, limit int, places []db.Place) JSONData {
 		Next:   nextPage,
 		Last:   lastPage,
 	}
+}
+
+func GetClosestPlacesHandler(w http.ResponseWriter, r *http.Request, store db.Store) {
+	lat, lon, err := getLatLonParam(r)
+
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	places, err := store.GetClosestPlaces(lat, lon, closestPlaces)
+
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, places)
+}
+
+func getLatLonParam(r *http.Request) (float64, float64, error) {
+	latStr := r.URL.Query().Get("lat")
+
+	if latStr == "" {
+		return 0, 0, errors.New("Missing 'lat' parameter")
+	}
+
+	lat, err := strconv.ParseFloat(latStr, 64)
+
+	if err != nil {
+		return 0, 0, fmt.Errorf("Invalid 'lat' value: '%s'", latStr)
+	}
+
+	lonStr := r.URL.Query().Get("lon")
+
+	if lonStr == "" {
+		return 0, 0, errors.New("Missing 'lon' parameter")
+	}
+
+	lon, err := strconv.ParseFloat(lonStr, 64)
+
+	if err != nil {
+		return 0, 0, fmt.Errorf("Invalid 'lon' value: '%s'", lonStr)
+	}
+
+	return lat, lon, err
 }

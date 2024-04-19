@@ -2,7 +2,8 @@ package handlers
 
 import "day03/internal/db"
 
-const limit = 10
+const resultsPerPage = 10
+const closestPlaces = 3
 
 const htmlTemplate = `<!doctype html>
 <html>
