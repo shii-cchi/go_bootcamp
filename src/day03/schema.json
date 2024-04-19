@@ -1,4 +1,9 @@
 {
+  "settings": {
+    "index": {
+      "max_result_window": 20000
+    }
+  },
   "mappings": {
     "properties": {
       "name": {

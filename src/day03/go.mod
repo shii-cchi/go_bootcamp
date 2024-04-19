@@ -3,8 +3,8 @@ module day03
 go 1.22.2
 
 require (
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/elastic/go-elasticsearch/v8 v8.13.1
-	github.com/joho/godotenv v1.5.1
 )
 
 require (

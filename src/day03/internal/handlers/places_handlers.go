@@ -24,11 +24,6 @@ func GetAllPlacesHTMLHandler(w http.ResponseWriter, r *http.Request, store db.St
 	places, total, err := store.GetPlaces(resultsPerPage, offset)
 
 	if err != nil {
-		if err.Error() == "Error: 400 Bad Request: all shards failed" {
-			http.Error(w, fmt.Sprintf("Invalid 'page' value: '%d'", page), http.StatusBadRequest)
-			return
-		}
-
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -100,11 +95,6 @@ func GetAllPlacesJSONHandler(w http.ResponseWriter, r *http.Request, store db.St
 	places, total, err := store.GetPlaces(resultsPerPage, offset)
 
 	if err != nil {
-		if err.Error() == "Error: 400 Bad Request: all shards failed" {
-			respondWithError(w, http.StatusBadRequest, fmt.Sprintf("Invalid 'page' value: '%d'", page))
-			return
-		}
-
 		respondWithError(w, http.StatusBadRequest, err.Error())
 		return
 	}
