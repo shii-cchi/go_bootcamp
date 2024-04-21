@@ -10,10 +10,10 @@ import (
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
 
-	"day04_ex00/restapi/operations"
+	"day04_ex01/restapi/operations"
 )
 
-//go:generate swagger generate server --target ../../day04 --name CandyServer --spec ../swagger-api/swagger.yaml --principal interface{}
+//go:generate swagger generate server --target ../../ex01 --name CandyServer --spec ../swagger-api/swagger.yaml --principal interface{} --default-scheme https
 
 func configureFlags(api *operations.CandyServerAPI) {
 	// api.CommandLineOptionsGroups = []swag.CommandLineOptionsGroup{ ... }

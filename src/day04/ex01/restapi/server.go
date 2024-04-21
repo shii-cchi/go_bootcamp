@@ -24,7 +24,7 @@ import (
 	flags "github.com/jessevdk/go-flags"
 	"golang.org/x/net/netutil"
 
-	"day04_ex00/restapi/operations"
+	"day04_ex01/restapi/operations"
 )
 
 const (
@@ -37,7 +37,7 @@ var defaultSchemes []string
 
 func init() {
 	defaultSchemes = []string{
-		schemeHTTP,
+		schemeHTTPS,
 	}
 }
 

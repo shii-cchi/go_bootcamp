@@ -1,4 +1,4 @@
-module day04_ex00
+module day04_ex01
 
 go 1.22.2
 
