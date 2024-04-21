@@ -1,8 +1,8 @@
 .PHONY: all
-all: build_ex00
+all: build
 
-.PHONY: build_ex00
-build_ex00:
+.PHONY: build
+build:
 	go build -o ex00 cmd/candy-server-server/main.go
 
 .PHONY: clean
