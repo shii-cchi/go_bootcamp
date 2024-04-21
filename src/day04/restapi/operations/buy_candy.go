@@ -273,7 +273,7 @@ var candyPrices = map[string]int64{
 	"YR": 23,
 }
 
-func MyHandler(params BuyCandyParams) middleware.Responder {
+func buyCandyHandler(params BuyCandyParams) middleware.Responder {
 	moneyReceived := *params.Order.Money
 	totalPrice := *params.Order.CandyCount * candyPrices[*params.Order.CandyType]
 

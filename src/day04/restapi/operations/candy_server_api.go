@@ -43,7 +43,7 @@ func NewCandyServerAPI(spec *loads.Document) *CandyServerAPI {
 		JSONProducer: runtime.JSONProducer(),
 
 		BuyCandyHandler: BuyCandyHandlerFunc(func(params BuyCandyParams) middleware.Responder {
-			return MyHandler(params)
+			return buyCandyHandler(params)
 		}),
 	}
 }
