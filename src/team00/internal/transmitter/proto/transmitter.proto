@@ -2,11 +2,13 @@ syntax = "proto3";
 
 package transmitter;
 
-import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = ".";
 
 service TransmitterService {
-  rpc TransmitStream (stream Transmission) returns (google.protobuf.Empty);
+  rpc TransmitStream (google.protobuf.Empty) returns (stream Transmission);
 }
 
 message Transmission {
