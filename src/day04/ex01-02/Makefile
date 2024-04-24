@@ -11,4 +11,4 @@ build_client:
 
 .PHONY: clean
 clean:
-	@rm -rf ex01
+	@rm -rf server client

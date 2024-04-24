@@ -4,7 +4,7 @@
 // - protoc             v3.12.4
 // source: transmitter.proto
 
-package __
+package transmitter
 
 import (
 	context "context"
