@@ -4,10 +4,12 @@ import (
 	"context"
 	"fmt"
 	"github.com/golang/protobuf/ptypes/empty"
+	"gorm.io/gorm"
 	"io"
 	"log"
 	"math"
 	"sync"
+	"team00/internal/db"
 	"team00/transmitter"
 )
 
@@ -36,7 +38,7 @@ var transmissionPool = sync.Pool{
 	},
 }
 
-func DetectAnomalies(cl transmitter.TransmitterServiceClient, k float64) error {
+func DetectAnomalies(cl transmitter.TransmitterServiceClient, k float64, database *gorm.DB) error {
 	stream, err := cl.TransmitStream(context.Background(), &empty.Empty{})
 
 	if err != nil {
@@ -66,6 +68,7 @@ func DetectAnomalies(cl transmitter.TransmitterServiceClient, k float64) error {
 		rightBound := stats.mean + k*stats.sd
 
 		if transmission.Frequency < leftBound || transmission.Frequency > rightBound {
+			database.Create(&db.Record{SessionId: transmission.SessionId, Frequency: transmission.Frequency, Timestamp: transmission.Timestamp.Seconds})
 			log.Printf("An anomaly has been detected! Frequency: %f", transmission.Frequency)
 		}
 

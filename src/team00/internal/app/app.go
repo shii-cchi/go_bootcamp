@@ -7,6 +7,7 @@ import (
 	"log"
 	"net"
 	"team00/internal/client"
+	"team00/internal/db"
 	"team00/internal/server"
 	"team00/transmitter"
 )
@@ -47,9 +48,16 @@ func RunClient() {
 
 	cl := transmitter.NewTransmitterServiceClient(conn)
 
-	err = client.DetectAnomalies(cl, *k)
+	database, err := db.ConnectToDb()
 
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	err = client.DetectAnomalies(cl, *k, database)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
 }
