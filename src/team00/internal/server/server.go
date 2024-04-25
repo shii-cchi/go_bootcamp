@@ -47,23 +47,25 @@ func (s *TransmitterServer) TransmitStream(req *empty.Empty, stream transmitter.
 	now := time.Now().UTC()
 
 	ts := &timestamp.Timestamp{
-		Seconds: int64(now.Unix()),
+		Seconds: now.Unix(),
 		Nanos:   int32(now.Nanosecond()),
 	}
 
-	frequency := rand.NormFloat64()*s.sd + s.mean
+	for {
+		frequency := rand.NormFloat64()*s.sd + s.mean
 
-	transmission := &transmitter.Transmission{
-		SessionId: s.sessionId,
-		Frequency: frequency,
-		Timestamp: ts,
+		transmission := &transmitter.Transmission{
+			SessionId: s.sessionId,
+			Frequency: frequency,
+			Timestamp: ts,
+		}
+
+		err := stream.Send(transmission)
+
+		if err != nil {
+			return err
+		}
+
+		time.Sleep(100 * time.Millisecond)
 	}
-
-	err := stream.Send(transmission)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
