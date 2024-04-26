@@ -25,7 +25,7 @@ func NewTransmitterServer() *TransmitterServer {
 	file, err := os.OpenFile("server.log", os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0666)
 
 	if err != nil {
-		log.Fatalf("Failed to open log file: %v", err)
+		log.Fatalf("Failed to open server.log file: %v", err)
 	}
 
 	logger := log.New(file, "", log.LstdFlags)
@@ -44,15 +44,15 @@ func (s *TransmitterServer) TransmitStream(req *empty.Empty, stream transmitter.
 		s.logger.Printf("sessionId: %s, mean: %f, sd: %f", s.sessionId, s.mean, s.sd)
 	})
 
-	now := time.Now().UTC()
-
-	ts := &timestamp.Timestamp{
-		Seconds: now.Unix(),
-		Nanos:   int32(now.Nanosecond()),
-	}
-
 	for {
 		frequency := rand.NormFloat64()*s.sd + s.mean
+
+		now := time.Now().UTC()
+
+		ts := &timestamp.Timestamp{
+			Seconds: now.Unix(),
+			Nanos:   int32(now.Nanosecond()),
+		}
 
 		transmission := &transmitter.Transmission{
 			SessionId: s.sessionId,

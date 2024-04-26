@@ -6,6 +6,7 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 	"log"
 	"net"
+	"os"
 	"team00/internal/client"
 	"team00/internal/db"
 	"team00/internal/server"
@@ -54,10 +55,19 @@ func RunClient() {
 		log.Fatal(err)
 	}
 
-	err = client.DetectAnomalies(cl, *k, database)
+	file, err := os.OpenFile("client.log", os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0666)
+
+	if err != nil {
+		log.Fatalf("failed to open client.log file: %v", err)
+	}
+
+	defer file.Close()
+
+	logger := log.New(file, "", log.LstdFlags)
+
+	err = client.DetectAnomalies(cl, *k, database, logger)
 
 	if err != nil {
 		log.Fatal(err)
 	}
-
 }

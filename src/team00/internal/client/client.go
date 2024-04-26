@@ -11,6 +11,7 @@ import (
 	"sync"
 	"team00/internal/db"
 	"team00/transmitter"
+	"time"
 )
 
 type Statistics struct {
@@ -38,14 +39,14 @@ var transmissionPool = sync.Pool{
 	},
 }
 
-func DetectAnomalies(cl transmitter.TransmitterServiceClient, k float64, database *gorm.DB) error {
+func DetectAnomalies(cl transmitter.TransmitterServiceClient, k float64, database *gorm.DB, logger *log.Logger) error {
 	stream, err := cl.TransmitStream(context.Background(), &empty.Empty{})
 
 	if err != nil {
 		return fmt.Errorf("error calling TransmitStream: %v", err)
 	}
 
-	stats, err := calcStatistics(stream)
+	stats, err := calcStatistics(stream, logger)
 
 	if err != nil {
 		return err
@@ -68,8 +69,8 @@ func DetectAnomalies(cl transmitter.TransmitterServiceClient, k float64, databas
 		rightBound := stats.mean + k*stats.sd
 
 		if transmission.Frequency < leftBound || transmission.Frequency > rightBound {
-			database.Create(&db.Record{SessionId: transmission.SessionId, Frequency: transmission.Frequency, Timestamp: transmission.Timestamp.Seconds})
-			log.Printf("An anomaly has been detected! Frequency: %f", transmission.Frequency)
+			database.Create(&db.Record{SessionId: transmission.SessionId, Frequency: transmission.Frequency, Timestamp: time.Unix(transmission.Timestamp.Seconds, int64(transmission.Timestamp.Nanos)).UTC()})
+			logger.Printf("An anomaly has been detected! Frequency: %f", transmission.Frequency)
 		}
 
 		transmissionPool.Put(transmission)
@@ -78,11 +79,11 @@ func DetectAnomalies(cl transmitter.TransmitterServiceClient, k float64, databas
 	return nil
 }
 
-func calcStatistics(stream transmitter.TransmitterService_TransmitStreamClient) (Statistics, error) {
+func calcStatistics(stream transmitter.TransmitterService_TransmitStreamClient, logger *log.Logger) (Statistics, error) {
 	var stats Statistics
 
 	for {
-		if stats.count > 150 {
+		if stats.count >= 150 {
 			break
 		}
 
@@ -102,7 +103,7 @@ func calcStatistics(stream transmitter.TransmitterService_TransmitStreamClient) 
 
 		transmissionPool.Put(transmission)
 
-		log.Printf("Count: %d, Mean: %f, StdDev: %f", stats.count, stats.mean, stats.sd)
+		logger.Printf("Count: %d, Mean: %f, StdDev: %f", stats.count, stats.mean, stats.sd)
 	}
 
 	return stats, nil

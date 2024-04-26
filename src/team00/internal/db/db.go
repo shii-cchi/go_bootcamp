@@ -4,13 +4,14 @@ import (
 	"fmt"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"time"
 )
 
 type Record struct {
 	gorm.Model
 	SessionId string
 	Frequency float64
-	Timestamp int64
+	Timestamp time.Time
 }
 
 func ConnectToDb() (*gorm.DB, error) {
