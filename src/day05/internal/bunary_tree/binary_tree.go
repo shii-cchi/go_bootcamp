@@ -1,7 +1,4 @@
-package app
-
-func Run() {
-}
+package bunary_tree
 
 type TreeNode struct {
 	HasToy bool
