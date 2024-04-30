@@ -12,7 +12,7 @@ var signingKey = []byte("your_secret_key")
 
 func GetToken(w http.ResponseWriter, r *http.Request) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
-		ExpiresAt: time.Now().Add(time.Second * 1).Unix(),
+		ExpiresAt: time.Now().Add(time.Hour * 4).Unix(),
 		Subject:   "umaradri",
 	})
 

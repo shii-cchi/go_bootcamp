@@ -1,14 +1,14 @@
 .PHONY: all
-all: build_ex00 build_ex01
+all: load_data search_app
 
-.PHONY: build_ex00
-build_ex00:
-	go build -o ex00 cmd/ex00/main.go
+.PHONY: load_data
+load_data:
+	go build -o load_data cmd/load_data/main.go
 
-.PHONY: build_ex01
-build_ex01:
-	go build -o ex01 cmd/ex01/main.go
+.PHONY: search_app
+search_app:
+	go build -o search_app cmd/search_app/main.go
 
 .PHONY: clean
 clean:
-	@rm -rf main
+	@rm -rf load_data search_app
