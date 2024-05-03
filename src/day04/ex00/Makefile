@@ -3,8 +3,12 @@ all: build
 
 .PHONY: build
 build:
-	go build -o ex00 cmd/candy-server-server/main.go
+	go build -o server cmd/candy-server-server/main.go
+
+.PHONY: run_server
+run_server:
+	./server --port=3333
 
 .PHONY: clean
 clean:
-	@rm -rf ex00
+	@rm -rf server
