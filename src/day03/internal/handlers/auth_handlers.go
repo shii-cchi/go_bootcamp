@@ -58,13 +58,8 @@ func Authenticate(next http.HandlerFunc) http.HandlerFunc {
 			return signingKey, nil
 		})
 
-		if !token.Valid {
+		if err != nil || !token.Valid {
 			respondWithError(w, http.StatusUnauthorized, "Token is not valid")
-			return
-		}
-
-		if err != nil {
-			respondWithError(w, http.StatusUnauthorized, fmt.Sprintf("Error parsing token: %s", err.Error()))
 			return
 		}
 
