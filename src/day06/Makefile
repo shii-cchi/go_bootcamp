@@ -1,4 +1,4 @@
-include .env
+include ex01-02/.env
 
 .PHONY: all
 all: create_logo
@@ -9,11 +9,11 @@ create_logo:
 
 .PHONY: migration
 migration:
-	cd ./internal/database/sql/schema && goose postgres ${DB_URI} up
+	cd ex01-02/internal/database/schema && goose postgres ${DB_URI} up
 
 .PHONY: migration_down
 migration_down:
-	cd ./internal/database/sql/schema && goose postgres ${DB_URI} down
+	cd ex01-02/internal/database/schema && goose postgres ${DB_URI} down
 
 .PHONY: sqlc
 sqlc:

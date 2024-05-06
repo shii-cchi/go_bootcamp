@@ -3,6 +3,8 @@ package server
 import (
 	"database/sql"
 	"day06/ex01-02/internal/config"
+	"day06/ex01-02/internal/database"
+	"day06/ex01-02/internal/handlers"
 	"github.com/go-chi/chi/v5"
 	"log"
 	"net/http"
@@ -10,7 +12,7 @@ import (
 
 type Server struct {
 	httpServer  *http.Server
-	httpHandler *http.Handler
+	httpHandler *handlers.Handler
 	queries     *database.Queries
 }
 
@@ -29,9 +31,9 @@ func NewServer(r chi.Router) (*Server, error) {
 
 	queries := database.New(conn)
 
-	services := service.NewServices(queries, cfg)
+	handler := handlers.NewHandler(queries)
 
-	handler := handlers.NewHandler(services)
+	handler.RegisterHTTPEndpoints(r)
 
 	log.Printf("Server starting on port %s", cfg.Port)
 
