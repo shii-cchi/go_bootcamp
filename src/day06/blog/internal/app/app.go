@@ -1,7 +1,7 @@
 package app
 
 import (
-	"day06/ex01-02/internal/server"
+	"day06/blog/internal/server"
 	"github.com/go-chi/chi/v5"
 	"log"
 )

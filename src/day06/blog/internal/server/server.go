@@ -2,10 +2,11 @@ package server
 
 import (
 	"database/sql"
-	"day06/ex01-02/internal/config"
-	"day06/ex01-02/internal/database"
-	"day06/ex01-02/internal/handlers"
+	"day06/blog/internal/config"
+	"day06/blog/internal/database"
+	"day06/blog/internal/handlers"
 	"github.com/go-chi/chi/v5"
+	_ "github.com/lib/pq"
 	"log"
 	"net/http"
 )
@@ -31,7 +32,7 @@ func NewServer(r chi.Router) (*Server, error) {
 
 	queries := database.New(conn)
 
-	handler := handlers.NewHandler(queries)
+	handler := handlers.NewHandler(queries, cfg)
 
 	handler.RegisterHTTPEndpoints(r)
 

@@ -9,7 +9,7 @@ import (
 )
 
 type Article struct {
-	ID        int64
+	ID        int32
 	Title     string
 	Content   string
 	CreatedAt time.Time

@@ -45,7 +45,7 @@ type GetArticleRow struct {
 	CreatedAt time.Time
 }
 
-func (q *Queries) GetArticle(ctx context.Context, id int64) (GetArticleRow, error) {
+func (q *Queries) GetArticle(ctx context.Context, id int32) (GetArticleRow, error) {
 	row := q.db.QueryRowContext(ctx, getArticle, id)
 	var i GetArticleRow
 	err := row.Scan(&i.Title, &i.Content, &i.CreatedAt)

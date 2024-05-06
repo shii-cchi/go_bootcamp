@@ -1,19 +1,23 @@
-include ex01-02/.env
+include blog/.env
 
 .PHONY: all
 all: create_logo
 
 .PHONY: create_logo
 create_logo:
-	go build -o create_logo ex00/amazing_logo.go
+	go build -o create_logo logo/amazing_logo.go
+
+.PHONY: build_server
+build_server:
+	go build -o server blog/cmd/main.go
 
 .PHONY: migration
 migration:
-	cd ex01-02/internal/database/schema && goose postgres ${DB_URI} up
+	cd blog/internal/database/schema && goose postgres ${DB_URI} up
 
 .PHONY: migration_down
 migration_down:
-	cd ex01-02/internal/database/schema && goose postgres ${DB_URI} down
+	cd blog/internal/database/schema && goose postgres ${DB_URI} down
 
 .PHONY: sqlc
 sqlc:

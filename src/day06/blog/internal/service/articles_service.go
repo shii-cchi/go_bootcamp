@@ -2,19 +2,24 @@ package service
 
 import (
 	"context"
-	"day06/ex01-02/internal/database"
+	"day06/blog/internal/config"
+	"day06/blog/internal/database"
+	"errors"
 	"fmt"
+	"time"
 )
 
 const limitArticles = 3
 
 type ArticlesService struct {
 	queries *database.Queries
+	cfg     *config.Config
 }
 
-func NewArticlesService(q *database.Queries) *ArticlesService {
+func NewArticlesService(q *database.Queries, cfg *config.Config) *ArticlesService {
 	return &ArticlesService{
 		queries: q,
+		cfg:     cfg,
 	}
 }
 
@@ -41,7 +46,7 @@ func (s ArticlesService) GetArticles(ctx context.Context, page int64) ([]databas
 	return articles, nil
 }
 
-func (s ArticlesService) GetArticle(ctx context.Context, id int64) (database.GetArticleRow, error) {
+func (s ArticlesService) GetArticle(ctx context.Context, id int32) (database.GetArticleRow, error) {
 	article, err := s.queries.GetArticle(ctx, id)
 
 	if err != nil {
@@ -49,4 +54,26 @@ func (s ArticlesService) GetArticle(ctx context.Context, id int64) (database.Get
 	}
 
 	return article, nil
+}
+
+func (s ArticlesService) CreateArticle(ctx context.Context, title, content string) (database.Article, error) {
+	article, err := s.queries.CreateArticle(ctx, database.CreateArticleParams{
+		Title:     title,
+		Content:   content,
+		CreatedAt: time.Now().UTC(),
+	})
+
+	if err != nil {
+		return database.Article{}, err
+	}
+
+	return article, nil
+}
+
+func (s ArticlesService) LoginAdmin(login, password string) error {
+	if login != s.cfg.AdminLogin || password != s.cfg.AdminPassword {
+		return errors.New("wrong admin credentials")
+	}
+
+	return nil
 }

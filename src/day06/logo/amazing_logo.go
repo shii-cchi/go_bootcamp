@@ -22,7 +22,7 @@ func createLogo() {
 
 	drawCat(logo)
 
-	file, err := os.Create("ex00/amazing_logo.png")
+	file, err := os.Create("logo/amazing_logo.png")
 	if err != nil {
 		log.Fatalf("Error creating file amazing_logo.png: %s", err)
 	}
