@@ -3,10 +3,13 @@ package handlers
 import (
 	"fmt"
 	"github.com/go-chi/chi/v5"
+	"github.com/gorilla/sessions"
 	"html/template"
 	"net/http"
 	"strconv"
 )
+
+var store = sessions.NewCookieStore([]byte("your-secret-key"))
 
 func (h *Handler) getArticles(w http.ResponseWriter, r *http.Request) {
 	pageStr := r.URL.Query().Get("page")
@@ -67,6 +70,17 @@ func (h *Handler) getArticle(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) getLoginPage(w http.ResponseWriter, r *http.Request) {
+	session, err := store.Get(r, "session")
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, fmt.Sprintf("Unauthorized: %v", err))
+		return
+	}
+
+	if session.Values["authenticated"] != nil && session.Values["authenticated"].(bool) {
+		http.Redirect(w, r, "/admin/post", http.StatusSeeOther)
+		return
+	}
+
 	tmpl := template.Must(template.ParseFiles("blog_frontend/html/login_page.html"))
 
 	if err := tmpl.Execute(w, nil); err != nil {
@@ -98,10 +112,30 @@ func (h *Handler) loginAdmin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	session, err := store.Get(r, "session")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	session.Values["authenticated"] = true
+	session.Options.MaxAge = 7200
+	session.Save(r, w)
+
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
 	http.Redirect(w, r, "/admin/post", http.StatusSeeOther)
 }
 
 func (h *Handler) getNewPostPage(w http.ResponseWriter, r *http.Request) {
+	session, err := store.Get(r, "session")
+	if err != nil || session.Values["authenticated"] == nil || !session.Values["authenticated"].(bool) {
+		http.Redirect(w, r, "/admin", http.StatusSeeOther)
+		return
+	}
+
 	tmpl := template.Must(template.ParseFiles("blog_frontend/html/admin_panel.html"))
 
 	if err := tmpl.Execute(w, nil); err != nil {
