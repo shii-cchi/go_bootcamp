@@ -1,0 +1,28 @@
+body {
+    background-color: hotpink;
+}
+
+.article-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.article-container h2 {
+    color: rgba(31, 15, 83, 1);
+    text-align: center;
+}
+
+.content {
+    background-color: white;
+    color: rgba(31, 15, 83, 1);
+    margin-top: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.pagination {
+    color: rgba(31, 15, 83, 1);
+    text-align: center;
+}

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мой блог</title>
+    <link rel="stylesheet" href="http://localhost:8888/static/css/main_page_style.css">
+</head>
+<body>
+<div class="header">
+    <img src="http://localhost:8888/static/images/amazing_logo.png" alt="Логотип блога">
+</div>
+<div class="article-list">
+    <h2>Все статьи</h2>
+    {{range .Articles}}
+    <div class="article">
+        <a href="/{{.ID}}"><h3>{{.Title}}</h3></a>
+        <p>{{.Content}}</p>
+        <p>{{.CreatedAt.Format "2006-01-02 15:04:05"}}</p>
+    </div>
+    {{end}}
+</div>
+<div class="pagination">
+    {{if gt .CurrentPage 1}}
+    <a href="/?page={{.PrevPage}}">Назад</a>
+    {{end}}
+
+    {{if lt .CurrentPage .MaxPage}}
+    <a href="/?page={{.NextPage}}">Вперёд</a>
+    {{end}}
+</div>
+</body>
+</html>

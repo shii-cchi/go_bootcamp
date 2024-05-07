@@ -1,5 +1,5 @@
 -- name: GetArticles :many
-SELECT title, content, created_at FROM articles
+SELECT id, title, content, created_at FROM articles
 LIMIT $1 OFFSET $2;
 
 -- name: GetArticle :one

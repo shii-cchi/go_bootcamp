@@ -53,7 +53,7 @@ func (q *Queries) GetArticle(ctx context.Context, id int32) (GetArticleRow, erro
 }
 
 const getArticles = `-- name: GetArticles :many
-SELECT title, content, created_at FROM articles
+SELECT id, title, content, created_at FROM articles
 LIMIT $1 OFFSET $2
 `
 
@@ -62,22 +62,21 @@ type GetArticlesParams struct {
 	Offset int32
 }
 
-type GetArticlesRow struct {
-	Title     string
-	Content   string
-	CreatedAt time.Time
-}
-
-func (q *Queries) GetArticles(ctx context.Context, arg GetArticlesParams) ([]GetArticlesRow, error) {
+func (q *Queries) GetArticles(ctx context.Context, arg GetArticlesParams) ([]Article, error) {
 	rows, err := q.db.QueryContext(ctx, getArticles, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []GetArticlesRow
+	var items []Article
 	for rows.Next() {
-		var i GetArticlesRow
-		if err := rows.Scan(&i.Title, &i.Content, &i.CreatedAt); err != nil {
+		var i Article
+		if err := rows.Scan(
+			&i.ID,
+			&i.Title,
+			&i.Content,
+			&i.CreatedAt,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

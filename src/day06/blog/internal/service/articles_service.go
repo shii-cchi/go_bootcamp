@@ -6,6 +6,7 @@ import (
 	"day06/blog/internal/database"
 	"errors"
 	"fmt"
+	"math"
 	"time"
 )
 
@@ -23,15 +24,17 @@ func NewArticlesService(q *database.Queries, cfg *config.Config) *ArticlesServic
 	}
 }
 
-func (s ArticlesService) GetArticles(ctx context.Context, page int64) ([]database.GetArticlesRow, error) {
+func (s ArticlesService) GetArticles(ctx context.Context, page int64) ([]database.Article, int64, error) {
 	articlesCount, err := s.queries.GetArticlesCount(ctx)
 
 	if err != nil {
-		return nil, fmt.Errorf("error getting articles count: %v", err)
+		return nil, 0, fmt.Errorf("error getting articles count: %v", err)
 	}
 
+	pageCount := int64(math.Ceil(float64(articlesCount) / float64(limitArticles)))
+
 	if page > articlesCount {
-		return nil, fmt.Errorf("out of range page value: %v", err)
+		return nil, 0, fmt.Errorf("out of range page value: %v", err)
 	}
 
 	articles, err := s.queries.GetArticles(ctx, database.GetArticlesParams{
@@ -40,10 +43,10 @@ func (s ArticlesService) GetArticles(ctx context.Context, page int64) ([]databas
 	})
 
 	if err != nil {
-		return nil, fmt.Errorf("error getting articles: %v", err)
+		return nil, 0, fmt.Errorf("error getting articles: %v", err)
 	}
 
-	return articles, nil
+	return articles, pageCount, nil
 }
 
 func (s ArticlesService) GetArticle(ctx context.Context, id int32) (database.GetArticleRow, error) {

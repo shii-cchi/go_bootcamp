@@ -1,0 +1,36 @@
+body {
+    background-color: hotpink;
+}
+
+.article-list {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.article-list h2 {
+    color: rgba(31, 15, 83, 1);
+    text-align: center;
+}
+
+.article {
+    margin-bottom: 20px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.article h3 {
+    color: rgba(31, 15, 83, 1);
+    margin-top: 0;
+}
+
+.article p {
+    color: rgba(31, 15, 83, 1);
+    margin-bottom: 0;
+}
+
+.pagination {
+    color: rgba(31, 15, 83, 1);
+    text-align: center;
+}

@@ -1,10 +1,19 @@
 package handlers
 
 import (
+	"day06/blog/internal/database"
 	"encoding/json"
 	"log"
 	"net/http"
 )
+
+type HomePageData struct {
+	Articles    []database.Article
+	MaxPage     int64
+	CurrentPage int64
+	PrevPage    int64
+	NextPage    int64
+}
 
 func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 	data, err := json.Marshal(payload)

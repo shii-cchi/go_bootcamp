@@ -1,0 +1,49 @@
+body {
+    background-color: hotpink;
+}
+
+.post-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.post-container h2 {
+    text-align: center;
+    color: rgba(31, 15, 83, 1);
+}
+
+.input-group {
+    margin-bottom: 20px;
+}
+
+.input-group label {
+    color: rgba(31, 15, 83, 1);
+    display: block;
+    margin-bottom: 5px;
+}
+
+.input-group input,
+.input-group textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.button-container {
+    text-align: center;
+}
+
+button[type="submit"] {
+    padding: 10px 20px;
+    border: none;
+    background-color: rgba(31, 15, 83, 1);
+    color: #fff;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button[type="submit"]:hover {
+    background-color: rgba(31, 15, 83, 1);
+}

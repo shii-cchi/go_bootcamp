@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Добавить новую статью</title>
+    <link rel="stylesheet" href="http://localhost:8888/static/css/admin_panel_styles.css">
+</head>
+<body>
+<div class="post-container">
+    <h2>Добавить новую статью</h2>
+    <form action="/admin/post" method="POST">
+        <div class="input-group">
+            <label for="title">Заголовок:</label>
+            <input id="title" name="title" required type="text">
+        </div>
+        <div class="input-group">
+            <label for="content">Содержание:</label>
+            <textarea id="content" name="content" required></textarea>
+        </div>
+        <button type="submit">Опубликовать</button>
+    </form>
+</div>
+</body>
+</html>
