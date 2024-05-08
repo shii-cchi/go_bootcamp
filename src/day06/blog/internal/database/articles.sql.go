@@ -35,25 +35,25 @@ func (q *Queries) CreateArticle(ctx context.Context, arg CreateArticleParams) (A
 }
 
 const getArticle = `-- name: GetArticle :one
-SELECT title, content, created_at FROM articles
+SELECT id, title, content FROM articles
 WHERE id = $1
 `
 
 type GetArticleRow struct {
-	Title     string
-	Content   string
-	CreatedAt time.Time
+	ID      int32
+	Title   string
+	Content string
 }
 
 func (q *Queries) GetArticle(ctx context.Context, id int32) (GetArticleRow, error) {
 	row := q.db.QueryRowContext(ctx, getArticle, id)
 	var i GetArticleRow
-	err := row.Scan(&i.Title, &i.Content, &i.CreatedAt)
+	err := row.Scan(&i.ID, &i.Title, &i.Content)
 	return i, err
 }
 
 const getArticles = `-- name: GetArticles :many
-SELECT id, title, content, created_at FROM articles
+SELECT id, title, created_at FROM articles
 LIMIT $1 OFFSET $2
 `
 
@@ -62,21 +62,22 @@ type GetArticlesParams struct {
 	Offset int32
 }
 
-func (q *Queries) GetArticles(ctx context.Context, arg GetArticlesParams) ([]Article, error) {
+type GetArticlesRow struct {
+	ID        int32
+	Title     string
+	CreatedAt time.Time
+}
+
+func (q *Queries) GetArticles(ctx context.Context, arg GetArticlesParams) ([]GetArticlesRow, error) {
 	rows, err := q.db.QueryContext(ctx, getArticles, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Article
+	var items []GetArticlesRow
 	for rows.Next() {
-		var i Article
-		if err := rows.Scan(
-			&i.ID,
-			&i.Title,
-			&i.Content,
-			&i.CreatedAt,
-		); err != nil {
+		var i GetArticlesRow
+		if err := rows.Scan(&i.ID, &i.Title, &i.CreatedAt); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

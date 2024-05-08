@@ -1,9 +1,9 @@
 -- name: GetArticles :many
-SELECT id, title, content, created_at FROM articles
+SELECT id, title, created_at FROM articles
 LIMIT $1 OFFSET $2;
 
 -- name: GetArticle :one
-SELECT title, content, created_at FROM articles
+SELECT id, title, content FROM articles
 WHERE id = $1;
 
 -- name: CreateArticle :one

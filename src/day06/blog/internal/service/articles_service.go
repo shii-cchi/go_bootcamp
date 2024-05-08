@@ -6,6 +6,7 @@ import (
 	"day06/blog/internal/database"
 	"errors"
 	"fmt"
+	"github.com/russross/blackfriday/v2"
 	"math"
 	"time"
 )
@@ -24,7 +25,7 @@ func NewArticlesService(q *database.Queries, cfg *config.Config) *ArticlesServic
 	}
 }
 
-func (s ArticlesService) GetArticles(ctx context.Context, page int64) ([]database.Article, int64, error) {
+func (s ArticlesService) GetArticles(ctx context.Context, page int64) ([]database.GetArticlesRow, int64, error) {
 	articlesCount, err := s.queries.GetArticlesCount(ctx)
 
 	if err != nil {
@@ -33,7 +34,7 @@ func (s ArticlesService) GetArticles(ctx context.Context, page int64) ([]databas
 
 	pageCount := int64(math.Ceil(float64(articlesCount) / float64(limitArticles)))
 
-	if page > articlesCount {
+	if page > pageCount {
 		return nil, 0, fmt.Errorf("out of range page value: %v", err)
 	}
 
@@ -56,7 +57,11 @@ func (s ArticlesService) GetArticle(ctx context.Context, id int32) (database.Get
 		return database.GetArticleRow{}, err
 	}
 
-	return article, nil
+	return database.GetArticleRow{
+		ID:      article.ID,
+		Title:   article.Title,
+		Content: string(blackfriday.Run([]byte(article.Content))),
+	}, nil
 }
 
 func (s ArticlesService) CreateArticle(ctx context.Context, title, content string) (database.Article, error) {

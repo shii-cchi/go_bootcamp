@@ -1,7 +1,7 @@
 include blog/.env
 
 .PHONY: all
-all: create_logo
+all: create_logo build_server
 
 .PHONY: create_logo
 create_logo:
@@ -25,4 +25,4 @@ sqlc:
 
 .PHONY: clean
 clean:
-	@rm -rf create_logo
+	@rm -rf create_logo server

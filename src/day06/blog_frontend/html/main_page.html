@@ -15,7 +15,6 @@
     {{range .Articles}}
     <div class="article">
         <a href="/{{.ID}}"><h3>{{.Title}}</h3></a>
-        <p>{{.Content}}</p>
         <p>{{.CreatedAt.Format "2006-01-02 15:04:05"}}</p>
     </div>
     {{end}}
