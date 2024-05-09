@@ -34,7 +34,7 @@ func (s ArticlesService) GetArticles(ctx context.Context, page int64) ([]databas
 
 	pageCount := int64(math.Ceil(float64(articlesCount) / float64(limitArticles)))
 
-	if page > pageCount {
+	if page != 1 && page > pageCount {
 		return nil, 0, fmt.Errorf("out of range page value: %v", err)
 	}
 
