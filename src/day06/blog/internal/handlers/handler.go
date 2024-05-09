@@ -41,6 +41,7 @@ func rateLimit(requests int) func(http.Handler) http.Handler {
 		limiter := rate.NewLimiter(rate.Limit(requests), requests)
 
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
 			if limiter.Allow() == false {
 				fmt.Fprint(w, "<p style='color:red;'>429 Too Many Requests</p>")
 				return
