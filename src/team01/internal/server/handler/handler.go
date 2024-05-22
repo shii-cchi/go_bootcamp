@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"team01/internal/server/db"
 	"team01/internal/server/service"
 )
 
@@ -12,28 +13,37 @@ type RequestString struct {
 	DbRequest string `json:"db_request"`
 }
 
-func AllRequestsHandler(w http.ResponseWriter, r *http.Request) {
-	var reqString RequestString
+func AllRequestsHandler(database *db.Database) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var reqString RequestString
 
-	err := json.NewDecoder(r.Body).Decode(&reqString)
+		err := json.NewDecoder(r.Body).Decode(&reqString)
 
-	if err != nil {
-		respondWithError(w, http.StatusBadRequest, fmt.Sprintf("error decoding req body: %s", err.Error()))
+		if err != nil {
+			respondWithError(w, http.StatusBadRequest, fmt.Sprintf("error decoding req body: %s", err.Error()))
+			return
+		}
+
+		reqData, err := service.ParseRequest(reqString.DbRequest)
+
+		if err != nil {
+			respondWithError(w, http.StatusBadRequest, fmt.Sprintf("error parsing request string: %s", err.Error()))
+			return
+		}
+
+		res := service.DoRequest(reqData, database)
+
+		if res.Error != "" {
+			respondWithError(w, res.Code, fmt.Sprintf("error execute db request: %s", res.Error))
+			return
+		}
+
+		respondWithJSON(w, res.Code, res.Data)
 	}
+}
 
-	reqData, err := service.ParseRequest(reqString.DbRequest)
+func HeartbeatHandler(w http.ResponseWriter, r *http.Request) {
 
-	if err != nil {
-		respondWithError(w, http.StatusBadRequest, fmt.Sprintf("error parsing request string: %s", err.Error()))
-	}
-
-	res := service.DoRequest(reqData)
-
-	if res.Error != "" {
-		respondWithError(w, res.Code, fmt.Sprintf("error execute db request: %s", res.Error))
-	}
-
-	respondWithJSON(w, res.Code, nil)
 }
 
 func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {

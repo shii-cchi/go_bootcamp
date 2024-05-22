@@ -2,7 +2,6 @@ package db
 
 import (
 	"github.com/google/uuid"
-	"net/http"
 	"sync"
 )
 
@@ -21,34 +20,25 @@ func NewDatabase() *Database {
 	}
 }
 
-func (db *Database) setData(id uuid.UUID, data JsonData) int {
+func (db *Database) SetData(id uuid.UUID, data JsonData) {
 	db.mu.Lock()
 	defer db.mu.Unlock()
-
-	_, exists := db.store[id]
-
-	if exists {
-		db.store[id] = data
-		return http.StatusOK
-	}
 
 	db.store[id] = data
-	return http.StatusCreated
 }
 
-func (db *Database) getData(id uuid.UUID) (int, JsonData) {
+func (db *Database) GetData(id uuid.UUID) JsonData {
 	db.mu.Lock()
 	defer db.mu.Unlock()
 
-	data, exists := db.store[id]
+	data, _ := db.store[id]
 
-	if !exists {
-		return http.StatusNotFound, JsonData{}
-	}
-
-	return http.StatusOK, data
+	return data
 }
 
-func (db *Database) deleteData(id uuid.UUID) (int, string) {
+func (db *Database) DeleteData(id uuid.UUID) {
+	db.mu.Lock()
+	defer db.mu.Unlock()
 
+	delete(db.store, id)
 }

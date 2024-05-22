@@ -20,7 +20,7 @@ func ParseRequest(reqString string) (RequestData, error) {
 	parts := strings.SplitN(reqString, " ", 3)
 
 	if len(parts) < 2 {
-		return RequestData{}, errors.New("invalid request format")
+		return RequestData{}, errors.New("1invalid request format")
 	}
 
 	if parts[0] != "SET" && parts[0] != "GET" && parts[0] != "DELETE" {
@@ -28,7 +28,7 @@ func ParseRequest(reqString string) (RequestData, error) {
 	}
 
 	if len(parts) == 3 && parts[0] != "SET" || len(parts) == 2 && parts[0] == "SET" {
-		return RequestData{}, errors.New("invalid request format")
+		return RequestData{}, errors.New("2invalid request format")
 	}
 
 	id, err := uuid.Parse(parts[1])
@@ -40,10 +40,10 @@ func ParseRequest(reqString string) (RequestData, error) {
 	if parts[0] == "SET" {
 		var data db.JsonData
 
-		err = json.NewDecoder(strings.NewReader(parts[2])).Decode(&data)
+		err = json.NewDecoder(strings.NewReader(strings.Replace(parts[2], "'", "", -1))).Decode(&data)
 
 		if err != nil {
-			return RequestData{}, errors.New("invalid request format")
+			return RequestData{}, errors.New("3invalid request format")
 		}
 
 		reqData.Data = data
