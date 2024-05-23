@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"team01/internal/server/db"
+	"team01/internal/server/repository"
 	"team01/internal/server/service"
 )
 
@@ -13,7 +13,7 @@ type RequestString struct {
 	DbRequest string `json:"db_request"`
 }
 
-func AllRequestsHandler(database *db.Database) http.HandlerFunc {
+func AllRequestsHandler(store *repository.Store) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var reqString RequestString
 
@@ -27,23 +27,18 @@ func AllRequestsHandler(database *db.Database) http.HandlerFunc {
 		reqData, err := service.ParseRequest(reqString.DbRequest)
 
 		if err != nil {
-			respondWithError(w, http.StatusBadRequest, fmt.Sprintf("error parsing request string: %s", err.Error()))
+			respondWithError(w, http.StatusBadRequest, err.Error())
 			return
 		}
 
-		res := service.DoRequest(reqData, database)
+		res := service.DoRequest(reqData, store)
 
-		if res.Error != "" {
-			respondWithError(w, res.Code, fmt.Sprintf("error execute db request: %s", res.Error))
-			return
-		}
-
-		respondWithJSON(w, res.Code, res.Data)
+		respondWithJSON(w, res.Code, res)
 	}
 }
 
 func HeartbeatHandler(w http.ResponseWriter, r *http.Request) {
-
+	respondWithJSON(w, http.StatusOK, "pong")
 }
 
 func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {

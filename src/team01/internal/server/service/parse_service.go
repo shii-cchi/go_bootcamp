@@ -3,15 +3,16 @@ package service
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/google/uuid"
 	"strings"
-	"team01/internal/server/db"
+	"team01/internal/server/repository"
 )
 
 type RequestData struct {
 	Operation string
 	ID        uuid.UUID
-	Data      db.JsonData
+	ItemData  repository.ItemData
 }
 
 func ParseRequest(reqString string) (RequestData, error) {
@@ -20,38 +21,39 @@ func ParseRequest(reqString string) (RequestData, error) {
 	parts := strings.SplitN(reqString, " ", 3)
 
 	if len(parts) < 2 {
-		return RequestData{}, errors.New("1invalid request format")
+		return RequestData{}, errors.New("invalid request format: must contain at least operation and ID")
 	}
 
-	if parts[0] != "SET" && parts[0] != "GET" && parts[0] != "DELETE" {
-		return RequestData{}, errors.New("invalid operation")
+	switch parts[0] {
+	case "SET", "GET", "DELETE":
+		reqData.Operation = parts[0]
+	default:
+		return RequestData{}, fmt.Errorf("invalid operation: must be SET, GET, or DELETE, got %s", reqData.Operation)
 	}
 
-	if len(parts) == 3 && parts[0] != "SET" || len(parts) == 2 && parts[0] == "SET" {
-		return RequestData{}, errors.New("2invalid request format")
+	if reqData.Operation != "SET" {
+		if len(parts) != 2 {
+			return RequestData{}, errors.New("invalid request format: GET or DELETE operations requires just ID")
+		}
 	}
 
 	id, err := uuid.Parse(parts[1])
-
 	if err != nil {
 		return RequestData{}, errors.New("invalid UUID")
 	}
+	reqData.ID = id
 
-	if parts[0] == "SET" {
-		var data db.JsonData
-
-		err = json.NewDecoder(strings.NewReader(strings.Replace(parts[2], "'", "", -1))).Decode(&data)
-
-		if err != nil {
-			return RequestData{}, errors.New("3invalid request format")
+	if reqData.Operation == "SET" {
+		if len(parts) != 3 {
+			return RequestData{}, errors.New("invalid request format: SET operation requires data")
 		}
 
-		reqData.Data = data
+		err := json.NewDecoder(strings.NewReader(strings.Trim(parts[2], "'"))).Decode(&reqData.ItemData)
+
+		if err != nil {
+			return RequestData{}, errors.New("invalid request format")
+		}
 	}
-
-	reqData.Operation = parts[0]
-
-	reqData.ID = id
 
 	return reqData, nil
 }
