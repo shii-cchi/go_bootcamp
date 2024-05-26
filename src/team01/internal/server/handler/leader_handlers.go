@@ -6,12 +6,12 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"team01/internal/server/config"
 	"team01/internal/server/repository"
 	"team01/internal/server/service"
-	"time"
 )
 
-func AllRequestsHandler(store *repository.Store, isLeader bool) http.HandlerFunc {
+func AllRequestsHandler(store *repository.Store, cfg *config.ServerConfig, cluster *Cluster) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var reqString RequestString
 
@@ -35,8 +35,8 @@ func AllRequestsHandler(store *repository.Store, isLeader bool) http.HandlerFunc
 
 		res := service.DoRequest(reqData, store)
 
-		if (res.Code == http.StatusCreated || (res.Code == http.StatusOK && (res.RequestType == "SET" || res.RequestType == "DELETE"))) && isLeader {
-			for _, node := range NodesSummaryList {
+		if (res.Code == http.StatusCreated || (res.Code == http.StatusOK && (res.RequestType == "SET" || res.RequestType == "DELETE"))) && cfg.CurrentPort == cfg.LeaderPort {
+			for _, node := range cluster.NodesList {
 				err = makeReplication(node, body)
 				if err != nil {
 					respondWithError(w, http.StatusBadRequest, err.Error())
@@ -49,7 +49,7 @@ func AllRequestsHandler(store *repository.Store, isLeader bool) http.HandlerFunc
 	}
 }
 
-func makeReplication(node NodeSummary, body []byte) error {
+func makeReplication(node Node, body []byte) error {
 	if node.Role != "Leader" {
 		replRes, err := http.Post(fmt.Sprintf("http://127.0.0.1:%d/", node.Port), "application/json", bytes.NewReader(body))
 		if err != nil {
@@ -74,80 +74,28 @@ func makeReplication(node NodeSummary, body []byte) error {
 	return nil
 }
 
-func HeartbeatFromFollowersHandler(w http.ResponseWriter, r *http.Request) {
-	var node Node
+func HeartbeatFromFollowersHandler(cluster *Cluster) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		node := Node{}
 
-	err := json.NewDecoder(r.Body).Decode(&node)
-	if err != nil {
-		respondWithError(w, http.StatusBadRequest, fmt.Sprintf("error decoding request body: %s", err.Error()))
-		return
-	}
-
-	if len(heartbeatFollower.NodesList) != 0 {
-		NodesSummaryList = heartbeatFollower.NodesList
-		heartbeatFollower = Heartbeat{}
-		fmt.Println("NodesList:", NodesSummaryList)
-	}
-
-	if isNewNode(node) {
-		NodesSummaryList = append(NodesSummaryList, node.NodeSummary)
-		NodesList = append(NodesList, node)
-
-		fmt.Printf("the node on port %d has been registered\n", node.NodeSummary.Port)
-		fmt.Println("NodesList:", NodesSummaryList)
-	} else {
-		updateLastActive(node)
-	}
-
-	heartbeatLeader := Heartbeat{
-		NodesList:         NodesSummaryList,
-		ReplicationFactor: REPLICATION_FACTOR,
-	}
-
-	respondWithJSON(w, http.StatusOK, heartbeatLeader)
-}
-
-func isNewNode(node Node) bool {
-	if len(NodesSummaryList) == 0 {
-		return true
-	}
-
-	for _, n := range NodesSummaryList {
-		if n.Port == node.NodeSummary.Port {
-			return false
+		err := json.NewDecoder(r.Body).Decode(&node)
+		if err != nil {
+			respondWithError(w, http.StatusBadRequest, fmt.Sprintf("error decoding request body: %s", err.Error()))
+			return
 		}
-	}
 
-	return true
-}
-
-func updateLastActive(node Node) {
-	for i, n := range NodesList {
-		if n.NodeSummary.Port == node.NodeSummary.Port {
-			NodesList[i].LastActive = node.LastActive
-			break
+		if cluster.isExistNode(node) {
+			cluster.AppendNode(node)
+		} else {
+			cluster.updateLastActive(node)
 		}
+
+		respondWithJSON(w, http.StatusOK, cluster)
 	}
 }
 
-func CheckFollowers() {
-	for i, node := range NodesList {
-		if node.NodeSummary.Role == "Leader" {
-			continue
-		}
-
-		if time.Since(node.LastActive) > HEARTBEAT_TIMEOUT {
-			fmt.Printf("Node on port %d is dead\n", node.NodeSummary.Port)
-			NodesList = append(NodesList[:i], NodesList[i+1:]...)
-			NodesSummaryList = append(NodesSummaryList[:i], NodesSummaryList[i+1:]...)
-			fmt.Println("NodesList:", NodesSummaryList)
-		}
+func HeartbeatFromClientHandler(cluster *Cluster) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		respondWithJSON(w, http.StatusOK, Heartbeat{NodesList: cluster.NodesList, ReplicationFactor: ReplicationFactor})
 	}
-}
-
-func HeartbeatFromClientHandler(w http.ResponseWriter, r *http.Request) {
-	respondWithJSON(w, http.StatusOK, Heartbeat{
-		NodesList:         NodesSummaryList,
-		ReplicationFactor: REPLICATION_FACTOR,
-	})
 }

@@ -31,12 +31,6 @@ func MakeRequest(cfg *config.ClientConfig, heartbeat *Heartbeat) {
 			break
 		}
 
-		select {
-		case newPort := <-cfg.PortChan:
-			cfg.Port = newPort
-		default:
-		}
-
 		res, err := http.Post(fmt.Sprintf("http://%s:%d/", cfg.Host, cfg.Port), "application/json", bytes.NewReader(reqJson))
 
 		if err != nil {

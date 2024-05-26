@@ -42,7 +42,6 @@ func handleHeartbeatError(cfg *config.ClientConfig, heartbeat *Heartbeat) {
 	fmt.Printf("Leader on port %d is dead\nConnecting to follower on port %d\n", cfg.Port, heartbeat.NodesList[1].Port)
 
 	cfg.Port = heartbeat.NodesList[1].Port
-	cfg.PortChan <- cfg.Port
 }
 
 func printConnectionMessage(cfg *config.ClientConfig, heartbeat *Heartbeat) {

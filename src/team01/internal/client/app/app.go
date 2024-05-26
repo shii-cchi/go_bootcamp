@@ -8,7 +8,6 @@ import (
 
 func RunClient() {
 	cfg := config.SetupFlags()
-	cfg.PortChan = make(chan int, 1)
 
 	var heartbeat service.Heartbeat
 

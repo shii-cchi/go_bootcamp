@@ -6,9 +6,8 @@ import (
 )
 
 type ClientConfig struct {
-	Host     string
-	Port     int
-	PortChan chan int
+	Host string
+	Port int
 }
 
 func SetupFlags() ClientConfig {
