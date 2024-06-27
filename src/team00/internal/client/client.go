@@ -9,8 +9,8 @@ import (
 	"log"
 	"math"
 	"sync"
+	"team00/api/generated"
 	"team00/internal/db"
-	"team00/transmitter"
 	"time"
 )
 
@@ -23,39 +23,27 @@ type Statistics struct {
 	sd       float64
 }
 
-func (s *Statistics) Update(newValue float64) {
-	s.count++
-	s.sum += newValue
-	s.sumSq += math.Pow(newValue, 2)
-
-	s.mean = s.sum / float64(s.count)
-	s.variance = (s.sumSq / float64(s.count)) - math.Pow(s.mean, 2)
-	s.sd = math.Sqrt(s.variance)
-}
-
-var transmissionPool = sync.Pool{
-	New: func() interface{} {
-		return &transmitter.Transmission{}
-	},
-}
-
-func DetectAnomalies(cl transmitter.TransmitterServiceClient, k float64, database *gorm.DB, logger *log.Logger) error {
-	stream, err := cl.TransmitStream(context.Background(), &empty.Empty{})
+func DetectAnomalies(cl generated.TransmitterServiceClient, k float64, database *gorm.DB, logger *log.Logger) error {
+	stream, err := cl.GetFrequencyStream(context.Background(), &empty.Empty{})
 
 	if err != nil {
-		return fmt.Errorf("error calling TransmitStream: %v", err)
+		return fmt.Errorf("error calling GetFrequencyStream: %v", err)
 	}
 
-	stats, err := calcStatistics(stream, logger)
-
-	if err != nil {
-		return err
+	var frequencyMessagePool = sync.Pool{
+		New: func() interface{} {
+			return &generated.FrequencyMessage{}
+		},
 	}
+
+	var stats Statistics
+	var leftBound, rightBound float64
+	const countStatisticsPoints = 150
 
 	for {
-		transmission := transmissionPool.Get().(*transmitter.Transmission)
+		frequencyMessage := frequencyMessagePool.Get().(*generated.FrequencyMessage)
 
-		err := stream.RecvMsg(transmission)
+		err := stream.RecvMsg(frequencyMessage)
 
 		if err == io.EOF {
 			break
@@ -65,46 +53,41 @@ func DetectAnomalies(cl transmitter.TransmitterServiceClient, k float64, databas
 			return fmt.Errorf("error receiving data: %v", err)
 		}
 
-		leftBound := stats.mean - k*stats.sd
-		rightBound := stats.mean + k*stats.sd
+		if stats.count < countStatisticsPoints {
+			stats = makeStatistics(frequencyMessage.Frequency, stats)
+			logger.Printf("Count: %d, Mean: %f, StdDev: %f", stats.count, stats.mean, stats.sd)
 
-		if transmission.Frequency < leftBound || transmission.Frequency > rightBound {
-			database.Create(&db.Record{SessionId: transmission.SessionId, Frequency: transmission.Frequency, Timestamp: time.Unix(transmission.Timestamp.Seconds, int64(transmission.Timestamp.Nanos)).UTC()})
-			logger.Printf("An anomaly has been detected! Frequency: %f", transmission.Frequency)
+			if stats.count == countStatisticsPoints {
+				leftBound = stats.mean - k*stats.sd
+				rightBound = stats.mean + k*stats.sd
+			}
+
+		} else {
+			if isAnomaly(frequencyMessage.Frequency, leftBound, rightBound) {
+				database.Create(&db.Record{SessionId: frequencyMessage.SessionId, Frequency: frequencyMessage.Frequency, Timestamp: time.Unix(frequencyMessage.Timestamp.Seconds, int64(frequencyMessage.Timestamp.Nanos)).UTC()})
+				logger.Printf("An anomaly has been detected! Frequency: %f", frequencyMessage.Frequency)
+			}
 		}
 
-		transmissionPool.Put(transmission)
+		frequencyMessagePool.Put(frequencyMessage)
 	}
 
 	return nil
 }
 
-func calcStatistics(stream transmitter.TransmitterService_TransmitStreamClient, logger *log.Logger) (Statistics, error) {
-	var stats Statistics
+func makeStatistics(newFrequency float64, stats Statistics) Statistics {
+	stats.count++
 
-	for {
-		if stats.count >= 150 {
-			break
-		}
+	stats.sum += newFrequency
+	stats.sumSq += math.Pow(newFrequency, 2)
 
-		transmission := transmissionPool.Get().(*transmitter.Transmission)
+	stats.mean = stats.sum / float64(stats.count)
+	stats.variance = (stats.sumSq / float64(stats.count)) - math.Pow(stats.mean, 2)
+	stats.sd = math.Sqrt(stats.variance)
 
-		err := stream.RecvMsg(transmission)
+	return stats
+}
 
-		if err == io.EOF {
-			break
-		}
-
-		if err != nil {
-			return Statistics{}, fmt.Errorf("error receiving data: %v", err)
-		}
-
-		stats.Update(transmission.Frequency)
-
-		transmissionPool.Put(transmission)
-
-		logger.Printf("Count: %d, Mean: %f, StdDev: %f", stats.count, stats.mean, stats.sd)
-	}
-
-	return stats, nil
+func isAnomaly(frequency, leftBound, rightBound float64) bool {
+	return frequency < leftBound || frequency > rightBound
 }

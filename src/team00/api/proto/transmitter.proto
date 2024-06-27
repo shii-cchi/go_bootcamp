@@ -1,17 +1,15 @@
 syntax = "proto3";
 
-package transmitter;
-
 import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
 
-option go_package = "../transmitter";
+option go_package = "/generated";
 
 service TransmitterService {
-  rpc TransmitStream (google.protobuf.Empty) returns (stream Transmission);
+  rpc GetFrequencyStream (google.protobuf.Empty) returns (stream FrequencyMessage);
 }
 
-message Transmission {
+message FrequencyMessage {
   string session_id = 1;
   double frequency = 2;
   google.protobuf.Timestamp timestamp = 3;

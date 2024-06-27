@@ -4,7 +4,7 @@
 // - protoc             v3.12.4
 // source: transmitter.proto
 
-package transmitter
+package generated
 
 import (
 	context "context"
@@ -20,14 +20,14 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	TransmitterService_TransmitStream_FullMethodName = "/transmitter.TransmitterService/TransmitStream"
+	TransmitterService_GetFrequencyStream_FullMethodName = "/TransmitterService/GetFrequencyStream"
 )
 
 // TransmitterServiceClient is the client API for TransmitterService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type TransmitterServiceClient interface {
-	TransmitStream(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (TransmitterService_TransmitStreamClient, error)
+	GetFrequencyStream(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (TransmitterService_GetFrequencyStreamClient, error)
 }
 
 type transmitterServiceClient struct {
@@ -38,12 +38,12 @@ func NewTransmitterServiceClient(cc grpc.ClientConnInterface) TransmitterService
 	return &transmitterServiceClient{cc}
 }
 
-func (c *transmitterServiceClient) TransmitStream(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (TransmitterService_TransmitStreamClient, error) {
-	stream, err := c.cc.NewStream(ctx, &TransmitterService_ServiceDesc.Streams[0], TransmitterService_TransmitStream_FullMethodName, opts...)
+func (c *transmitterServiceClient) GetFrequencyStream(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (TransmitterService_GetFrequencyStreamClient, error) {
+	stream, err := c.cc.NewStream(ctx, &TransmitterService_ServiceDesc.Streams[0], TransmitterService_GetFrequencyStream_FullMethodName, opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &transmitterServiceTransmitStreamClient{stream}
+	x := &transmitterServiceGetFrequencyStreamClient{stream}
 	if err := x.ClientStream.SendMsg(in); err != nil {
 		return nil, err
 	}
@@ -53,17 +53,17 @@ func (c *transmitterServiceClient) TransmitStream(ctx context.Context, in *empty
 	return x, nil
 }
 
-type TransmitterService_TransmitStreamClient interface {
-	Recv() (*Transmission, error)
+type TransmitterService_GetFrequencyStreamClient interface {
+	Recv() (*FrequencyMessage, error)
 	grpc.ClientStream
 }
 
-type transmitterServiceTransmitStreamClient struct {
+type transmitterServiceGetFrequencyStreamClient struct {
 	grpc.ClientStream
 }
 
-func (x *transmitterServiceTransmitStreamClient) Recv() (*Transmission, error) {
-	m := new(Transmission)
+func (x *transmitterServiceGetFrequencyStreamClient) Recv() (*FrequencyMessage, error) {
+	m := new(FrequencyMessage)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
@@ -74,7 +74,7 @@ func (x *transmitterServiceTransmitStreamClient) Recv() (*Transmission, error) {
 // All implementations must embed UnimplementedTransmitterServiceServer
 // for forward compatibility
 type TransmitterServiceServer interface {
-	TransmitStream(*empty.Empty, TransmitterService_TransmitStreamServer) error
+	GetFrequencyStream(*empty.Empty, TransmitterService_GetFrequencyStreamServer) error
 	mustEmbedUnimplementedTransmitterServiceServer()
 }
 
@@ -82,8 +82,8 @@ type TransmitterServiceServer interface {
 type UnimplementedTransmitterServiceServer struct {
 }
 
-func (UnimplementedTransmitterServiceServer) TransmitStream(*empty.Empty, TransmitterService_TransmitStreamServer) error {
-	return status.Errorf(codes.Unimplemented, "method TransmitStream not implemented")
+func (UnimplementedTransmitterServiceServer) GetFrequencyStream(*empty.Empty, TransmitterService_GetFrequencyStreamServer) error {
+	return status.Errorf(codes.Unimplemented, "method GetFrequencyStream not implemented")
 }
 func (UnimplementedTransmitterServiceServer) mustEmbedUnimplementedTransmitterServiceServer() {}
 
@@ -98,24 +98,24 @@ func RegisterTransmitterServiceServer(s grpc.ServiceRegistrar, srv TransmitterSe
 	s.RegisterService(&TransmitterService_ServiceDesc, srv)
 }
 
-func _TransmitterService_TransmitStream_Handler(srv interface{}, stream grpc.ServerStream) error {
+func _TransmitterService_GetFrequencyStream_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(empty.Empty)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(TransmitterServiceServer).TransmitStream(m, &transmitterServiceTransmitStreamServer{stream})
+	return srv.(TransmitterServiceServer).GetFrequencyStream(m, &transmitterServiceGetFrequencyStreamServer{stream})
 }
 
-type TransmitterService_TransmitStreamServer interface {
-	Send(*Transmission) error
+type TransmitterService_GetFrequencyStreamServer interface {
+	Send(*FrequencyMessage) error
 	grpc.ServerStream
 }
 
-type transmitterServiceTransmitStreamServer struct {
+type transmitterServiceGetFrequencyStreamServer struct {
 	grpc.ServerStream
 }
 
-func (x *transmitterServiceTransmitStreamServer) Send(m *Transmission) error {
+func (x *transmitterServiceGetFrequencyStreamServer) Send(m *FrequencyMessage) error {
 	return x.ServerStream.SendMsg(m)
 }
 
@@ -123,13 +123,13 @@ func (x *transmitterServiceTransmitStreamServer) Send(m *Transmission) error {
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var TransmitterService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "transmitter.TransmitterService",
+	ServiceName: "TransmitterService",
 	HandlerType: (*TransmitterServiceServer)(nil),
 	Methods:     []grpc.MethodDesc{},
 	Streams: []grpc.StreamDesc{
 		{
-			StreamName:    "TransmitStream",
-			Handler:       _TransmitterService_TransmitStream_Handler,
+			StreamName:    "GetFrequencyStream",
+			Handler:       _TransmitterService_GetFrequencyStream_Handler,
 			ServerStreams: true,
 		},
 	},

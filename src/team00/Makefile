@@ -15,4 +15,4 @@ clean:
 
 .PHONY: protoc_gen
 protoc_gen:
-	protoc -I internal/proto/ --go_out=internal --go-grpc_out=internal internal/proto/transmitter.proto
+	protoc -I api/proto/ --go_out=api --go-grpc_out=api api/proto/transmitter.proto

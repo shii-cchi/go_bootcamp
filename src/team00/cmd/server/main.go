@@ -1,7 +1,9 @@
 package main
 
-import "team00/internal/app"
+import (
+	"team00/internal/server"
+)
 
 func main() {
-	app.RunServer()
+	server.RunServer()
 }
