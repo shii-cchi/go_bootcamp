@@ -15,26 +15,22 @@ func grabPresents(presents []Present, capacity int) []Present {
 	}
 
 	for i := 1; i <= n; i++ {
-		for w := 1; w <= capacity; w++ {
-			if presents[i-1].Size <= w {
-				table[i][w] = max(presents[i-1].Value+table[i-1][w-presents[i-1].Size], table[i-1][w])
+		for j := 1; j <= capacity; j++ {
+			if presents[i-1].Size <= j {
+				table[i][j] = max(presents[i-1].Value+table[i-1][j-presents[i-1].Size], table[i-1][j])
 			} else {
-				table[i][w] = table[i-1][w]
+				table[i][j] = table[i-1][j]
 			}
 		}
 	}
 
 	var chosenPresents []Present
-	w := capacity
-	for i := n; i > 0 && w > 0; i-- {
-		if table[i][w] != table[i-1][w] {
+	c := capacity
+	for i := n; i > 0 && c > 0; i-- {
+		if table[i][c] != table[i-1][c] {
 			chosenPresents = append(chosenPresents, presents[i-1])
-			w -= presents[i-1].Size
+			c -= presents[i-1].Size
 		}
-	}
-
-	if len(chosenPresents) == 0 {
-		return []Present{}
 	}
 
 	return chosenPresents

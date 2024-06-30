@@ -20,7 +20,7 @@ func TestGrabPresents_OnePresent1(t *testing.T) {
 func TestGrabPresents_OnePresent2(t *testing.T) {
 	presents := []Present{{Value: 5, Size: 6}}
 	capacity := 4
-	expected := []Present{}
+	var expected []Present
 
 	result := grabPresents(presents, capacity)
 

@@ -37,21 +37,21 @@ func unrollGarland(root *TreeNode) []bool {
 		return nil
 	}
 
-	var result []bool
+	var commonResult []bool
 	queue := []*TreeNode{root}
-	level := 0
+	level := 1
 
 	for len(queue) > 0 {
 		size := len(queue)
-		currentLevel := make([]bool, size)
+		currentResult := make([]bool, size)
 
 		for i := 0; i < size; i++ {
 			node := queue[i]
 
-			if level%2 != 0 {
-				currentLevel[i] = node.HasToy
+			if level%2 == 0 {
+				currentResult[i] = node.HasToy
 			} else {
-				currentLevel[size-i-1] = node.HasToy
+				currentResult[size-i-1] = node.HasToy
 			}
 
 			if node.Left != nil {
@@ -62,11 +62,11 @@ func unrollGarland(root *TreeNode) []bool {
 			}
 		}
 
-		result = append(result, currentLevel...)
+		commonResult = append(commonResult, currentResult...)
 
 		queue = queue[size:]
 		level++
 	}
 
-	return result
+	return commonResult
 }
