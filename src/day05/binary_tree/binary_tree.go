@@ -1,4 +1,4 @@
-package bunary_tree
+package binary_tree
 
 type TreeNode struct {
 	HasToy bool

@@ -1,4 +1,4 @@
-package bunary_tree
+package binary_tree
 
 import (
 	"reflect"
