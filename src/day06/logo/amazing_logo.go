@@ -17,8 +17,8 @@ func main() {
 func createLogo() {
 	logo := image.NewRGBA(image.Rect(0, 0, 300, 300))
 
-	bgColor := color.RGBA{31, 15, 83, 255}
-	draw.Draw(logo, logo.Bounds(), &image.Uniform{bgColor}, image.Point{}, draw.Src)
+	bgColor := color.RGBA{R: 31, G: 15, B: 83, A: 255}
+	draw.Draw(logo, logo.Bounds(), &image.Uniform{C: bgColor}, image.Point{}, draw.Src)
 
 	drawCat(logo)
 
@@ -35,25 +35,25 @@ func createLogo() {
 }
 
 func drawCat(img *image.RGBA) {
-	catColor := color.RGBA{255, 93, 178, 255}
-	drawCircle(img, image.Point{150, 150}, 80, catColor)
+	catColor := color.RGBA{R: 255, G: 93, B: 178, A: 255}
+	drawCircle(img, image.Point{X: 150, Y: 150}, 80, catColor)
 
-	earColor := color.RGBA{255, 93, 178, 255}
+	earColor := color.RGBA{R: 255, G: 93, B: 178, A: 255}
 	drawEarLeft(img, 80, 80, earColor)
 	drawEarRight(img, 180, 80, earColor)
 
-	eyeColor := color.RGBA{31, 15, 83, 255}
-	drawOval(img, image.Point{120, 130}, 15, 20, eyeColor)
-	drawOval(img, image.Point{180, 130}, 15, 20, eyeColor)
+	eyeColor := color.RGBA{R: 31, G: 15, B: 83, A: 255}
+	drawOval(img, image.Point{X: 120, Y: 130}, 15, 20, eyeColor)
+	drawOval(img, image.Point{X: 180, Y: 130}, 15, 20, eyeColor)
 
-	noseColor := color.RGBA{31, 15, 83, 255}
-	drawCircle(img, image.Point{150, 170}, 5, noseColor)
+	noseColor := color.RGBA{R: 31, G: 15, B: 83, A: 255}
+	drawCircle(img, image.Point{X: 150, Y: 170}, 5, noseColor)
 
-	whiskerColor := color.RGBA{31, 15, 83, 255}
-	drawWhiskers(img, image.Point{150, 170}, whiskerColor)
+	whiskerColor := color.RGBA{R: 31, G: 15, B: 83, A: 255}
+	drawWhiskers(img, image.Point{X: 150, Y: 170}, whiskerColor)
 
-	mouthColor := color.RGBA{31, 15, 83, 255}
-	drawMouth(img, image.Point{150, 180}, 25, 20, mouthColor)
+	mouthColor := color.RGBA{R: 31, G: 15, B: 83, A: 255}
+	drawMouth(img, image.Point{X: 150, Y: 180}, 25, 20, mouthColor)
 }
 
 func drawOval(img *image.RGBA, center image.Point, width, height int, clr color.Color) {
@@ -120,13 +120,13 @@ func drawLine(img *image.RGBA, p1, p2 image.Point, clr color.Color) {
 }
 
 func drawWhiskers(img *image.RGBA, start image.Point, clr color.Color) {
-	drawLine(img, start, image.Point{start.X - 50, start.Y}, clr)
-	drawLine(img, start, image.Point{start.X - 50, start.Y - 10}, clr)
-	drawLine(img, start, image.Point{start.X - 50, start.Y + 10}, clr)
+	drawLine(img, start, image.Point{X: start.X - 50, Y: start.Y}, clr)
+	drawLine(img, start, image.Point{X: start.X - 50, Y: start.Y - 10}, clr)
+	drawLine(img, start, image.Point{X: start.X - 50, Y: start.Y + 10}, clr)
 
-	drawLine(img, start, image.Point{start.X + 50, start.Y}, clr)
-	drawLine(img, start, image.Point{start.X + 50, start.Y + 10}, clr)
-	drawLine(img, start, image.Point{start.X + 50, start.Y - 10}, clr)
+	drawLine(img, start, image.Point{X: start.X + 50, Y: start.Y}, clr)
+	drawLine(img, start, image.Point{X: start.X + 50, Y: start.Y + 10}, clr)
+	drawLine(img, start, image.Point{X: start.X + 50, Y: start.Y - 10}, clr)
 }
 
 func drawMouth(img *image.RGBA, center image.Point, width, height int, clr color.Color) {

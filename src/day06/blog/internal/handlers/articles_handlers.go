@@ -29,6 +29,11 @@ type ArticleData struct {
 func (h *Handler) getArticles(w http.ResponseWriter, r *http.Request) {
 	pageStr := r.URL.Query().Get("page")
 
+	if pageStr == "" {
+		http.Redirect(w, r, "/?page=1", http.StatusSeeOther)
+		return
+	}
+
 	page, err := strconv.Atoi(pageStr)
 
 	if err != nil || page <= 0 {
