@@ -15,10 +15,10 @@ var store = sessions.NewCookieStore([]byte("your-secret-key"))
 
 type HomePageData struct {
 	Articles    []database.GetArticlesRow
-	MaxPage     int64
-	CurrentPage int64
-	PrevPage    int64
-	NextPage    int64
+	MaxPage     int
+	CurrentPage int
+	PrevPage    int
+	NextPage    int
 }
 
 type ArticleData struct {
@@ -31,8 +31,7 @@ func (h *Handler) getArticles(w http.ResponseWriter, r *http.Request) {
 	pageStr := r.URL.Query().Get("page")
 
 	if pageStr == "" {
-		http.Redirect(w, r, "/mainpage?page=1", http.StatusSeeOther)
-		return
+		pageStr = "1"
 	}
 
 	page, err := strconv.Atoi(pageStr)
@@ -43,7 +42,7 @@ func (h *Handler) getArticles(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	articles, maxPage, err := h.articleService.GetArticles(r.Context(), int64(page))
+	articles, maxPage, err := h.articleService.GetArticles(r.Context(), page)
 
 	if err != nil {
 		log.Printf("Page not found: %v", err)
@@ -54,9 +53,9 @@ func (h *Handler) getArticles(w http.ResponseWriter, r *http.Request) {
 	homePageData := HomePageData{
 		Articles:    articles,
 		MaxPage:     maxPage,
-		CurrentPage: int64(page),
-		PrevPage:    int64(page - 1),
-		NextPage:    int64(page + 1),
+		CurrentPage: page,
+		PrevPage:    page - 1,
+		NextPage:    page + 1,
 	}
 
 	tmpl := template.Must(template.ParseFiles("blog_frontend/html/main_page.html"))
@@ -191,7 +190,5 @@ func (h *Handler) createArticle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	articleId := article.ID
-
-	http.Redirect(w, r, fmt.Sprintf("/articles/%d", articleId), http.StatusSeeOther)
+	http.Redirect(w, r, fmt.Sprintf("/articles/%d", article.ID), http.StatusSeeOther)
 }

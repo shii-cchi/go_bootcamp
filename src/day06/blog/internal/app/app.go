@@ -17,11 +17,7 @@ func Run() {
 		log.Fatal(err)
 	}
 
-	go func() {
-		if err := srv.Run(); err != nil {
-			log.Fatal(err)
-		}
-	}()
-
-	select {}
+	if err = srv.Run(); err != nil {
+		log.Fatal(err)
+	}
 }

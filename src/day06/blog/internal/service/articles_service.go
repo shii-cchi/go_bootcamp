@@ -25,14 +25,14 @@ func NewArticlesService(q *database.Queries, cfg *config.Config) *ArticlesServic
 	}
 }
 
-func (s ArticlesService) GetArticles(ctx context.Context, page int64) ([]database.GetArticlesRow, int64, error) {
+func (s ArticlesService) GetArticles(ctx context.Context, page int) ([]database.GetArticlesRow, int, error) {
 	articlesCount, err := s.queries.GetArticlesCount(ctx)
 
 	if err != nil {
 		return nil, 0, fmt.Errorf("error getting articles count: %v", err)
 	}
 
-	pageCount := int64(math.Ceil(float64(articlesCount) / float64(limitArticles)))
+	pageCount := int(math.Ceil(float64(articlesCount) / float64(limitArticles)))
 
 	if page != 1 && page > pageCount {
 		return nil, 0, fmt.Errorf("out of range page value: %v", err)

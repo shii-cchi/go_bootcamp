@@ -14,7 +14,6 @@ import (
 type Server struct {
 	httpServer  *http.Server
 	httpHandler *handlers.Handler
-	queries     *database.Queries
 }
 
 func NewServer(r chi.Router) (*Server, error) {
