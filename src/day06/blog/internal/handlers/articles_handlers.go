@@ -6,6 +6,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/gorilla/sessions"
 	"html/template"
+	"log"
 	"net/http"
 	"strconv"
 )
@@ -30,13 +31,14 @@ func (h *Handler) getArticles(w http.ResponseWriter, r *http.Request) {
 	pageStr := r.URL.Query().Get("page")
 
 	if pageStr == "" {
-		http.Redirect(w, r, "/?page=1", http.StatusSeeOther)
+		http.Redirect(w, r, "/mainpage?page=1", http.StatusSeeOther)
 		return
 	}
 
 	page, err := strconv.Atoi(pageStr)
 
 	if err != nil || page <= 0 {
+		log.Printf("Parameter 'page' conversion error or parameter 'page' is negative or zero: %v", err)
 		fmt.Fprint(w, "<p style='color:red;'>404 Page not found</p>")
 		return
 	}
@@ -44,6 +46,7 @@ func (h *Handler) getArticles(w http.ResponseWriter, r *http.Request) {
 	articles, maxPage, err := h.articleService.GetArticles(r.Context(), int64(page))
 
 	if err != nil {
+		log.Printf("Page not found: %v", err)
 		fmt.Fprint(w, "<p style='color:red;'>404 Page not found</p>")
 		return
 	}
@@ -58,7 +61,8 @@ func (h *Handler) getArticles(w http.ResponseWriter, r *http.Request) {
 
 	tmpl := template.Must(template.ParseFiles("blog_frontend/html/main_page.html"))
 
-	if err := tmpl.Execute(w, homePageData); err != nil {
+	if err = tmpl.Execute(w, homePageData); err != nil {
+		log.Printf("Error executing template blog_frontend/html/main_page.html: %v", err)
 		fmt.Fprint(w, "<p style='color:red;'>500 InternalServerError</p>")
 		return
 	}
@@ -70,6 +74,7 @@ func (h *Handler) getArticle(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(idStr)
 
 	if err != nil || id <= 0 {
+		log.Printf("Parameter 'id' conversion error or parameter 'id' is negative or zero: %v", err)
 		fmt.Fprint(w, "<p style='color:red;'>404 Article not found</p>")
 		return
 	}
@@ -77,6 +82,7 @@ func (h *Handler) getArticle(w http.ResponseWriter, r *http.Request) {
 	article, err := h.articleService.GetArticle(r.Context(), int32(id))
 
 	if err != nil {
+		log.Printf("Article not found: %v", err)
 		fmt.Fprint(w, "<p style='color:red;'>404 Article not found</p>")
 		return
 	}
@@ -89,7 +95,8 @@ func (h *Handler) getArticle(w http.ResponseWriter, r *http.Request) {
 
 	tmpl := template.Must(template.ParseFiles("blog_frontend/html/article_page.html"))
 
-	if err := tmpl.Execute(w, articleData); err != nil {
+	if err = tmpl.Execute(w, articleData); err != nil {
+		log.Printf("Error executing template blog_frontend/html/article_page.html: %v", err)
 		fmt.Fprint(w, "<p style='color:red;'>500 InternalServerError</p>")
 		return
 	}
@@ -112,6 +119,7 @@ func (h *Handler) getLoginPage(w http.ResponseWriter, r *http.Request) {
 	tmpl := template.Must(template.ParseFiles("blog_frontend/html/login_page.html"))
 
 	if err := tmpl.Execute(w, errorMessage); err != nil {
+		log.Printf("Error executing template blog_frontend/html/login_page.html: %v", err)
 		fmt.Fprint(w, "<p style='color:red;'>500 InternalServerError</p>")
 		return
 	}
@@ -120,6 +128,7 @@ func (h *Handler) getLoginPage(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) loginAdmin(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
+		log.Printf("Error parsing login form: %v", err)
 		fmt.Fprint(w, "<p style='color:red;'>500 InternalServerError</p>")
 		return
 	}
@@ -156,7 +165,8 @@ func (h *Handler) getNewPostPage(w http.ResponseWriter, r *http.Request) {
 
 	tmpl := template.Must(template.ParseFiles("blog_frontend/html/admin_panel.html"))
 
-	if err := tmpl.Execute(w, nil); err != nil {
+	if err = tmpl.Execute(w, nil); err != nil {
+		log.Printf("Error executing template blog_frontend/html/admin_panel.html: %v", err)
 		fmt.Fprint(w, "<p style='color:red;'>500 InternalServerError</p>")
 		return
 	}
@@ -165,6 +175,7 @@ func (h *Handler) getNewPostPage(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) createArticle(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
+		log.Printf("Error parsing creating article form: %v", err)
 		fmt.Fprint(w, "<p style='color:red;'>500 InternalServerError</p>")
 		return
 	}
@@ -172,19 +183,15 @@ func (h *Handler) createArticle(w http.ResponseWriter, r *http.Request) {
 	articleTitle := r.Form.Get("title")
 	articleContent := r.Form.Get("content")
 
-	if err != nil {
-		fmt.Fprint(w, "<p style='color:red;'>500 InternalServerError</p>")
-		return
-	}
-
 	article, err := h.articleService.CreateArticle(r.Context(), articleTitle, articleContent)
 
 	if err != nil {
+		log.Printf("Error creating article: %v", err)
 		fmt.Fprint(w, "<p style='color:red;'>500 InternalServerError</p>")
 		return
 	}
 
 	articleId := article.ID
 
-	http.Redirect(w, r, fmt.Sprintf("/%d", articleId), http.StatusSeeOther)
+	http.Redirect(w, r, fmt.Sprintf("/articles/%d", articleId), http.StatusSeeOther)
 }

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/go-chi/chi/v5"
 	"golang.org/x/time/rate"
+	"log"
 	"net/http"
 )
 
@@ -27,7 +28,9 @@ func (h *Handler) RegisterHTTPEndpoints(r chi.Router) {
 	r.Handle("/static/*", http.StripPrefix("/static/", fs))
 
 	r.Get("/", h.getArticles)
-	r.Get("/{id}", h.getArticle)
+	r.Get("/mainpage", h.getArticles)
+
+	r.Get("/articles/{id}", h.getArticle)
 
 	r.Get("/admin", h.getLoginPage)
 	r.Post("/admin/login", h.loginAdmin)
@@ -43,6 +46,7 @@ func rateLimit(requests int) func(http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 			if !limiter.Allow() {
+				log.Println("Too Many Requests")
 				fmt.Fprint(w, "<p style='color:red;'>429 Too Many Requests</p>")
 				return
 			}

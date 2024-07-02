@@ -14,18 +14,18 @@
     <h2>Все статьи</h2>
     {{range .Articles}}
     <div class="article">
-        <a href="/{{.ID}}"><h3>{{.Title}}</h3></a>
+        <a href="articles/{{.ID}}"><h3>{{.Title}}</h3></a>
         <p>{{.CreatedAt.Format "2006-01-02 15:04:05"}}</p>
     </div>
     {{end}}
 </div>
 <div class="pagination">
     {{if gt .CurrentPage 1}}
-    <a href="/?page={{.PrevPage}}">Назад</a>
+    <a href="/mainpage?page={{.PrevPage}}">Назад</a>
     {{end}}
 
     {{if lt .CurrentPage .MaxPage}}
-    <a href="/?page={{.NextPage}}">Вперёд</a>
+    <a href="/mainpage?page={{.NextPage}}">Вперёд</a>
     {{end}}
 </div>
 </body>
