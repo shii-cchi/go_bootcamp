@@ -27,10 +27,10 @@ func (h *Handler) RegisterHTTPEndpoints(r chi.Router) {
 	fs := http.FileServer(http.Dir("./blog_frontend"))
 	r.Handle("/static/*", http.StripPrefix("/static/", fs))
 
-	r.Get("/mainpage", h.getArticles)
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		http.Redirect(w, r, "/mainpage?page=1", http.StatusPermanentRedirect)
+		http.Redirect(w, r, "/mainpage", http.StatusMovedPermanently)
 	})
+	r.Get("/mainpage", h.getArticles)
 
 	r.Get("/articles/{id}", h.getArticle)
 
