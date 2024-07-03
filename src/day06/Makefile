@@ -25,7 +25,7 @@ sqlc:
 
 .PHONY: test_rate_limiter
 test_rate_limiter:
-	for i in $$(seq 1 200); do curl -X GET http://localhost:8888/1 & sleep 0.0001; done
+	for i in $$(seq 1 200); do curl -X GET http://localhost:8888/articles/2 & sleep 0.0001; done
 
 .PHONY: clean
 clean:
