@@ -17,9 +17,9 @@ func MinCoins(val int, coins []int) []int {
 	return res
 }
 
-// MinCoins2 calculates the minimum number of coins needed to cover a given value using certain coin denominations.
+// MinCoins2 calculates the minimum number of coins needed to cover a given value using certain coin denominations (using Greedy algorithm).
 //
-// This implementation checks the boundary cases and sorts the coins in ascending order before processing them.
+// This implementation checks the boundary cases and sorts the coins in descending order before processing them.
 //
 // Parameters:
 //   - val: The value that needs to be covered.
@@ -28,21 +28,18 @@ func MinCoins(val int, coins []int) []int {
 // Returns:
 //   - []int: The minimum number of coins needed to make change, represented as a slice of coin values.
 func MinCoins2(val int, coins []int) []int {
-	if len(coins) == 0 || val == 0 {
+	if len(coins) == 0 || val <= 0 {
 		return []int{}
 	}
 
-	sort.Sort(sort.IntSlice(coins))
+	sort.Sort(sort.Reverse(sort.IntSlice(coins)))
 
 	res := make([]int, 0)
-	i := len(coins) - 1
-
-	for i >= 0 {
-		for val >= coins[i] {
-			val -= coins[i]
-			res = append(res, coins[i])
+	for _, coin := range coins {
+		for val >= coin {
+			val -= coin
+			res = append(res, coin)
 		}
-		i -= 1
 	}
 
 	return res

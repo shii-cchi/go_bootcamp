@@ -1,14 +1,14 @@
-Showing nodes accounting for 1610ms, 58.97% of 2730ms total
-Dropped 58 nodes (cum <= 13.65ms)
-Showing top 10 nodes out of 134
+Showing nodes accounting for 1440ms, 64.29% of 2240ms total
+Dropped 42 nodes (cum <= 11.20ms)
+Showing top 10 nodes out of 127
       flat  flat%   sum%        cum   cum%
-     430ms 15.75% 15.75%      430ms 15.75%  runtime.futex
-     190ms  6.96% 22.71%      740ms 27.11%  runtime.mallocgc
-     190ms  6.96% 29.67%      190ms  6.96%  runtime.memclrNoHeapPointers
-     160ms  5.86% 35.53%     1260ms 46.15%  runtime.growslice
-     140ms  5.13% 40.66%      140ms  5.13%  runtime.memmove
-     110ms  4.03% 44.69%      740ms 27.11%  day07/ex00.MinCoins
-     110ms  4.03% 48.72%      110ms  4.03%  runtime.madvise
-     100ms  3.66% 52.38%      110ms  4.03%  runtime.typePointers.next
-      90ms  3.30% 55.68%       90ms  3.30%  runtime.nextFreeFast (inline)
-      90ms  3.30% 58.97%      110ms  4.03%  runtime.scanblock
+     410ms 18.30% 18.30%      410ms 18.30%  runtime.futex
+     220ms  9.82% 28.12%      220ms  9.82%  runtime.memclrNoHeapPointers
+     210ms  9.38% 37.50%      610ms 27.23%  runtime.mallocgc
+     140ms  6.25% 43.75%      140ms  6.25%  runtime.madvise
+     110ms  4.91% 48.66%      110ms  4.91%  runtime.memmove
+     100ms  4.46% 53.12%      110ms  4.91%  runtime.scanblock
+      90ms  4.02% 57.14%      610ms 27.23%  day07/ex00.MinCoins2
+      70ms  3.12% 60.27%      120ms  5.36%  runtime.typePointers.next
+      50ms  2.23% 62.50%       50ms  2.23%  runtime.tgkill
+      40ms  1.79% 64.29%      570ms 25.45%  day07/ex00.MinCoins

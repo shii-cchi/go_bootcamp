@@ -56,18 +56,24 @@ func TestMinCoins(t *testing.T) {
 		},
 		{
 			name:     "Test 8",
+			coins:    []int{1, 5, 10},
+			val:      -1,
+			expected: []int{},
+		},
+		{
+			name:     "Test 9",
 			coins:    []int{10, 5, 1},
 			val:      11,
 			expected: []int{10, 1},
 		},
 		{
-			name:     "Test 9",
+			name:     "Test 10",
 			coins:    []int{10, 5, 1, 2},
 			val:      12,
 			expected: []int{10, 2},
 		},
 		{
-			name:     "Test 10",
+			name:     "Test 11",
 			coins:    []int{1, 5, 10, 10},
 			val:      12,
 			expected: []int{10, 1, 1},

@@ -16,6 +16,6 @@ save_doc:
 	godoc -url http://localhost:6060/pkg/day07/ex00 > doc.html
 	zip docs.zip doc.html
 
-.PHONY: clear
-clear:
+.PHONY: clean
+clean:
 	@rm -rf cpu.prof ex01.test doc.html docs.zip
