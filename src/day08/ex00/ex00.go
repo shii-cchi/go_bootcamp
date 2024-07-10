@@ -18,9 +18,7 @@ func getElement(arr []int, idx int) (int, error) {
 		return 0, errors.New("error: index is out of bounds")
 	}
 
-	ptr := unsafe.Pointer(&arr[0])
-
-	elemPtr := (*int)(unsafe.Pointer(uintptr(ptr) + uintptr(idx)*unsafe.Sizeof(arr[0])))
+	elemPtr := (*int)(unsafe.Pointer(uintptr(unsafe.Pointer(&arr[0])) + uintptr(idx)*unsafe.Sizeof(arr[0])))
 
 	return *elemPtr, nil
 }

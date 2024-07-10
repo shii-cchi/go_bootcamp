@@ -2,7 +2,7 @@ package ex01
 
 import "testing"
 
-func TestDescribePlant(t *testing.T) {
+func TestDescribePlantNormalValues(t *testing.T) {
 	tests := []struct {
 		plant    interface{}
 		expected string
@@ -34,9 +34,28 @@ func TestDescribePlant(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		result := describePlant(test.plant)
+		result, err := describePlant(test.plant)
+		if err != nil {
+			t.Errorf("Unexpected error: %v", err)
+		}
+
 		if result != test.expected {
 			t.Errorf("For plant %v; expected %v, but got %v", test.plant, test.expected, result)
 		}
+	}
+}
+
+func TestDescribePlantError(t *testing.T) {
+	test := struct {
+		plant    interface{}
+		expected string
+	}{
+		plant:    1,
+		expected: "Error: input is not a struct, it's a int\n",
+	}
+
+	_, err := describePlant(test.plant)
+	if err.Error() != "Error: input is not a struct, it's a int\n" {
+		t.Errorf("For plant %v; expected %v, but got %v", test.plant, test.expected, err)
 	}
 }

@@ -18,13 +18,17 @@ type AnotherUnknownPlant struct {
 	Height      int `unit:"inches"`
 }
 
-func describePlant(plant interface{}) string {
-	v := reflect.ValueOf(plant)
-	t := v.Type()
+func describePlant(plant interface{}) (string, error) {
+	t := reflect.TypeOf(plant)
+
+	if t.Kind() != reflect.Struct {
+		return "", fmt.Errorf("Error: input is not a struct, it's a %T\n", plant)
+	}
 
 	var result string
+	v := reflect.ValueOf(plant)
 
-	for i := 0; i < v.NumField(); i++ {
+	for i := 0; i < t.NumField(); i++ {
 		field := t.Field(i)
 
 		fieldName := field.Name
@@ -40,5 +44,5 @@ func describePlant(plant interface{}) string {
 		}
 	}
 
-	return result
+	return result, nil
 }
