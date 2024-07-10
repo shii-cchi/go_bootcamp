@@ -1,5 +1,5 @@
 #import "window.h"
-#include "_cgo_export.h"
+//#include "_cgo_export.h"
 
 void* Window_Create(int x, int y, int width, int height, const char* title)
 {

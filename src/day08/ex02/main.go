@@ -1,8 +1,13 @@
 package main
 
-// #cgo LDFLAGS: -framework Cocoa
-// #include "window/application.h"
-// #include "window/window.h"
+/*
+#cgo CFLAGS: -x objective-c
+#cgo LDFLAGS: -framework Cocoa
+#include "window/application.m"
+#include "window/window.m"
+#import "window/application.h"
+#import "window/window.h"
+*/
 import "C"
 
 func main() {

@@ -8,4 +8,4 @@ test_ex01:
 
 .PHONY: ex02
 ex02:
-	go build -o ex02 ex02/main.go && ./ex02
+	go build -o app_ex02 ex02/main.go && ./app_ex02

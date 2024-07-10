@@ -1,5 +1,5 @@
 #import "application.h"
-#include "_cgo_export.h"
+//#include "_cgo_export.h"
 
 void InitApplication() {
     [NSApplication sharedApplication];
