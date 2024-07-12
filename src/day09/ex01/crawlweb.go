@@ -1,48 +1,12 @@
-package main
+package ex01
 
 import (
 	"context"
 	"fmt"
 	"io"
 	"net/http"
-	"os"
-	"os/signal"
 	"sync"
-	"syscall"
 )
-
-func main() {
-	ctx, cancel := context.WithCancel(context.Background())
-
-	urls := make(chan string)
-
-	cancelChan := make(chan os.Signal, 1)
-	signal.Notify(cancelChan, os.Interrupt, syscall.SIGTERM)
-
-	go func() {
-		<-cancelChan
-		fmt.Println("\nStopping...\nGraceful shutdown")
-		cancel()
-	}()
-
-	go func() {
-		urlList := []string{
-			"https://www.google.com",
-		}
-
-		for _, url := range urlList {
-			urls <- url
-		}
-
-		close(urls)
-	}()
-
-	results := crawlWeb(ctx, urls)
-
-	for result := range results {
-		fmt.Println(result)
-	}
-}
 
 func crawlWeb(ctx context.Context, inputChan chan string) chan string {
 	results := make(chan string)
@@ -72,14 +36,13 @@ func crawlWeb(ctx context.Context, inputChan chan string) chan string {
 				select {
 				case <-ctx.Done():
 					return
-				case results <- getResultString(body, err):
+				case results <- fmt.Sprintf("URL: %s Result: %p", url, getResultString(body, err)):
 				}
 
 			}(url)
 		}
 
 		wg.Wait()
-		close(semaphore)
 	}()
 
 	return results
@@ -103,10 +66,11 @@ func fetch(url string) (string, error) {
 	return string(body), nil
 }
 
-func getResultString(body string, err error) string {
+func getResultString(body string, err error) *string {
 	if err != nil {
-		return fmt.Sprintf("error getting web page body: %v", err)
+		result := fmt.Sprintf("error getting web page body: %v", err)
+		return &result
 	}
 
-	return body
+	return &body
 }

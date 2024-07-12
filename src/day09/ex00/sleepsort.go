@@ -6,24 +6,21 @@ import (
 )
 
 func sleepSort(unsortedNumbers []int) chan int {
-	numChan := make(chan int)
+	numChan := make(chan int, len(unsortedNumbers))
+	defer close(numChan)
 
 	var wg sync.WaitGroup
 
-	go func() {
-		defer close(numChan)
+	for _, number := range unsortedNumbers {
+		wg.Add(1)
+		go func(num int) {
+			defer wg.Done()
+			time.Sleep(time.Duration(num) * time.Second)
+			numChan <- num
+		}(number)
+	}
 
-		for _, number := range unsortedNumbers {
-			wg.Add(1)
-			go func(num int) {
-				defer wg.Done()
-				time.Sleep(time.Duration(num) * time.Second)
-				numChan <- num
-			}(number)
-		}
-
-		wg.Wait()
-	}()
+	wg.Wait()
 
 	return numChan
 }
