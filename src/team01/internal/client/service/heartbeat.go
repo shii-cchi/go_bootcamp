@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"reflect"
 	"team01/internal/client/config"
 	"time"
 )
@@ -22,6 +23,8 @@ func DoHeartbeat(cfg *config.ClientConfig, heartbeat *Heartbeat, failedRequest *
 			continue
 		}
 
+		oldHeartbeat := *heartbeat
+
 		err = json.NewDecoder(res.Body).Decode(&heartbeat)
 		if err != nil {
 			log.Fatalf("error decoding heartbeat from leader: %s", err.Error())
@@ -32,9 +35,14 @@ func DoHeartbeat(cfg *config.ClientConfig, heartbeat *Heartbeat, failedRequest *
 		}
 
 		if !connected {
-			printConnectionMessage(cfg, heartbeat)
+			fmt.Printf("Connected to a database at %s:%d\n", cfg.Host, cfg.Port)
+			printClusterInfo(cfg, heartbeat)
 			retryFailedRequests(cfg, heartbeat, failedRequest)
 			connected = true
+		} else {
+			if !reflect.DeepEqual(oldHeartbeat.NodesList, heartbeat.NodesList) {
+				printClusterInfo(cfg, heartbeat)
+			}
 		}
 	}
 }
@@ -67,14 +75,13 @@ func handleHeartbeatError(cfg *config.ClientConfig, heartbeat *Heartbeat) {
 	cfg.Port = heartbeat.NodesList[1].Port
 }
 
-func printConnectionMessage(cfg *config.ClientConfig, heartbeat *Heartbeat) {
-	fmt.Printf("Connected to a database at %s:%d\n", cfg.Host, cfg.Port)
+func printClusterInfo(cfg *config.ClientConfig, heartbeat *Heartbeat) {
 	fmt.Println("Known nodes:")
 	for _, node := range heartbeat.NodesList {
 		fmt.Printf("%s:%d %s\n", cfg.Host, node.Port, node.Role)
 	}
 
-	if len(heartbeat.NodesList) < heartbeat.ReplicationFactor {
-		fmt.Printf("WARNING: cluster size (%d) is smaller than a replication factor (%d)!\n", len(heartbeat.NodesList), heartbeat.ReplicationFactor)
+	if len(heartbeat.NodesList)-1 < heartbeat.ReplicationFactor {
+		fmt.Printf("WARNING: cluster size (%d) is smaller than a replication factor (%d)!\n", len(heartbeat.NodesList)-1, heartbeat.ReplicationFactor)
 	}
 }
