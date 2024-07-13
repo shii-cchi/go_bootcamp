@@ -35,6 +35,10 @@ func DoHeartbeat(cfg *config.ServerConfig, cluster *Cluster) {
 		log.Fatal("error decoding response body from leader")
 	}
 
+	if newCluster.isEmpty() {
+		log.Fatal("cluster is full, current node can't be added")
+	}
+
 	if !cluster.IsEqual(newCluster) {
 		cluster.update(newCluster)
 		cluster.PrintNodesList()

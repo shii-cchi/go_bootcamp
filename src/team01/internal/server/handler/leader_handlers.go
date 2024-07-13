@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"team01/internal/server/config"
 	"team01/internal/server/repository"
@@ -66,9 +67,9 @@ func MakeReplication(node Node, body []byte) error {
 		}
 
 		if replResBody.Error == "" {
-			fmt.Printf("Successful replication for node on port %d\n", node.Port)
+			log.Printf("Successful replication for node on port %d\n", node.Port)
 		} else {
-			fmt.Println(replResBody.Error)
+			log.Println(replResBody.Error)
 		}
 
 	}
@@ -87,12 +88,19 @@ func HeartbeatFromFollowersHandler(store *repository.Store, cluster *Cluster) ht
 		}
 
 		if !cluster.isExistNode(node) {
-			cluster.AppendNode(node)
-			err = cluster.SyncNewNode(node, service.GetStore(store))
+			if cluster.isFull() {
+				log.Printf("the maximum number of nodes (%d), a new node with a port=(%d) can't be added\n", ReplicationFactor, node.Port)
 
-			if err != nil {
-				respondWithError(w, http.StatusBadRequest, err.Error())
+				respondWithError(w, http.StatusConflict, "cluster is full")
 				return
+			} else {
+				cluster.AppendNode(node)
+				err = cluster.SyncNewNode(node, service.GetStore(store))
+
+				if err != nil {
+					respondWithError(w, http.StatusBadRequest, err.Error())
+					return
+				}
 			}
 		} else {
 			cluster.updateLastActive(node)

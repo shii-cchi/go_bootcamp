@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/google/uuid"
+	"log"
 	"team01/internal/server/config"
 	"team01/internal/server/repository"
 	"time"
@@ -36,9 +37,9 @@ func (c *Cluster) Monitor(cfg *config.ServerConfig) {
 }
 
 func (c *Cluster) PrintNodesList() {
-	fmt.Println("Nodes List:")
+	log.Println("Nodes List:")
 	for _, node := range c.NodesList {
-		fmt.Printf("%d - %s\n", node.Port, node.Role)
+		log.Printf("%d - %s\n", node.Port, node.Role)
 	}
 }
 
@@ -46,7 +47,7 @@ func (c *Cluster) AppendNode(node Node) {
 	c.NodesList = append(c.NodesList, node)
 
 	if node.Role != "Leader" {
-		fmt.Printf("the node on port %d has been registered\n", node.Port)
+		log.Printf("the node on port %d has been registered\n", node.Port)
 	}
 
 	c.PrintNodesList()
@@ -86,7 +87,7 @@ func (c *Cluster) CheckFollowers() {
 		}
 
 		if time.Since(node.LastActive) > heartbeatTimeout {
-			fmt.Printf("Node on port %d is dead\n", node.Port)
+			log.Printf("Node on port %d is dead\n", node.Port)
 			c.NodesList = append(c.NodesList[:i], c.NodesList[i+1:]...)
 			c.PrintNodesList()
 		}
@@ -131,22 +132,22 @@ func (c *Cluster) IsEqual(other *Cluster) bool {
 }
 
 func (c *Cluster) isEmpty() bool {
-	if len(c.NodesList) == 0 {
-		return true
-	}
+	return len(c.NodesList) == 0
+}
 
-	return false
+func (c *Cluster) isFull() bool {
+	return len(c.NodesList)-1 >= ReplicationFactor
 }
 
 func (c *Cluster) makeNewLeader() int {
-	fmt.Println("Leader is dead")
+	log.Println("Leader is dead")
 
 	c.NodesList = c.NodesList[1:]
 
 	c.NodesList[0].Role = "Leader"
 	leaderPort := c.NodesList[0].Port
 
-	fmt.Printf("New leader is node on port %d\n", leaderPort)
+	log.Printf("New leader is node on port %d\n", leaderPort)
 
 	return leaderPort
 }

@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func DoHeartbeat(cfg *config.ClientConfig, heartbeat *Heartbeat) {
+func DoHeartbeat(cfg *config.ClientConfig, heartbeat *Heartbeat, failedRequest *FailedRequests) {
 	connected := false
 	ticker := time.NewTicker(heartbeatTick)
 
@@ -27,8 +27,13 @@ func DoHeartbeat(cfg *config.ClientConfig, heartbeat *Heartbeat) {
 			log.Fatalf("error decoding heartbeat from leader: %s", err.Error())
 		}
 
+		if cfg.Port != heartbeat.NodesList[0].Port {
+			cfg.Port = heartbeat.NodesList[0].Port
+		}
+
 		if !connected {
 			printConnectionMessage(cfg, heartbeat)
+			retryFailedRequests(cfg, heartbeat, failedRequest)
 			connected = true
 		}
 	}
@@ -36,11 +41,25 @@ func DoHeartbeat(cfg *config.ClientConfig, heartbeat *Heartbeat) {
 
 func handleHeartbeatError(cfg *config.ClientConfig, heartbeat *Heartbeat) {
 	if len(heartbeat.NodesList) == 0 {
-		log.Fatalf("Node on port %d is not a leader", cfg.Port)
+		log.Fatalf("Node on port %d is not running", cfg.Port)
 	}
 
 	if len(heartbeat.NodesList) == 1 {
-		log.Fatal("There are no running nodes")
+		fmt.Println("There are no running nodes")
+		heartbeat.NodesList = nil
+
+		for i := 0; i < maxRetryAttempts; i++ {
+			time.Sleep(retryDelay)
+			fmt.Printf("Retrying to connect... attempt %d/%d\n", i+1, maxRetryAttempts)
+
+			_, err := http.Get(fmt.Sprintf("http://%s:%d/ping", cfg.Host, cfg.Port))
+			if err == nil {
+				fmt.Println("Reconnected successfully.")
+				return
+			}
+		}
+
+		log.Fatalf("All retry attempts to reconnect failed. Exiting.")
 	}
 
 	fmt.Printf("Leader on port %d is dead\nConnecting to follower on port %d\n", cfg.Port, heartbeat.NodesList[1].Port)

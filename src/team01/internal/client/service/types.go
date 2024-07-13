@@ -1,11 +1,27 @@
 package service
 
-import "time"
+import (
+	"sync"
+	"time"
+)
 
-const heartbeatTick = 1 * time.Second
+const (
+	heartbeatTick    = 1 * time.Second
+	maxRetryAttempts = 10
+	retryDelay       = 2 * time.Second
+)
 
 type RequestString struct {
 	DbRequest string `json:"db_request"`
+}
+
+type FailedRequest struct {
+	RequestString []byte
+}
+
+type FailedRequests struct {
+	failedRequests []FailedRequest
+	mutex          sync.Mutex
 }
 
 type ResponseData struct {

@@ -10,16 +10,17 @@ func RunClient() {
 	cfg := config.SetupFlags()
 
 	var heartbeat service.Heartbeat
+	var failedRequests service.FailedRequests
 
 	var wg sync.WaitGroup
 	wg.Add(1)
 
 	go func() {
 		defer wg.Done()
-		service.DoHeartbeat(&cfg, &heartbeat)
+		service.DoHeartbeat(&cfg, &heartbeat, &failedRequests)
 	}()
 
-	service.MakeRequest(&cfg, &heartbeat)
+	service.MakeRequest(&cfg, &heartbeat, &failedRequests)
 
 	wg.Wait()
 }
