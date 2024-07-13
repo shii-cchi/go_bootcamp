@@ -20,4 +20,3 @@ type Node struct {
 }
 
 const ReplicationFactor = 2
-const HeartbeatTimeout = time.Second * 11

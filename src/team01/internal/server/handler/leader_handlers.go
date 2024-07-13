@@ -37,7 +37,7 @@ func AllRequestsHandler(store *repository.Store, cfg *config.ServerConfig, clust
 
 		if (res.Code == http.StatusCreated || (res.Code == http.StatusOK && (res.RequestType == "SET" || res.RequestType == "DELETE"))) && cfg.CurrentPort == cfg.LeaderPort {
 			for _, node := range cluster.NodesList {
-				err = makeReplication(node, body)
+				err = MakeReplication(node, body)
 				if err != nil {
 					respondWithError(w, http.StatusBadRequest, err.Error())
 					return
@@ -49,7 +49,7 @@ func AllRequestsHandler(store *repository.Store, cfg *config.ServerConfig, clust
 	}
 }
 
-func makeReplication(node Node, body []byte) error {
+func MakeReplication(node Node, body []byte) error {
 	if node.Role != "Leader" {
 		replRes, err := http.Post(fmt.Sprintf("http://127.0.0.1:%d/", node.Port), "application/json", bytes.NewReader(body))
 		if err != nil {
@@ -67,6 +67,8 @@ func makeReplication(node Node, body []byte) error {
 
 		if replResBody.Error == "" {
 			fmt.Printf("Successful replication for node on port %d\n", node.Port)
+		} else {
+			fmt.Println(replResBody.Error)
 		}
 
 	}
@@ -74,7 +76,7 @@ func makeReplication(node Node, body []byte) error {
 	return nil
 }
 
-func HeartbeatFromFollowersHandler(cluster *Cluster) http.HandlerFunc {
+func HeartbeatFromFollowersHandler(store *repository.Store, cluster *Cluster) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		node := Node{}
 
@@ -84,8 +86,14 @@ func HeartbeatFromFollowersHandler(cluster *Cluster) http.HandlerFunc {
 			return
 		}
 
-		if cluster.isExistNode(node) {
+		if !cluster.isExistNode(node) {
 			cluster.AppendNode(node)
+			err = cluster.SyncNewNode(node, service.GetStore(store))
+
+			if err != nil {
+				respondWithError(w, http.StatusBadRequest, err.Error())
+				return
+			}
 		} else {
 			cluster.updateLastActive(node)
 		}

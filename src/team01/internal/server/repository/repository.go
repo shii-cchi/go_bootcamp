@@ -42,3 +42,10 @@ func (db *Store) DeleteData(id uuid.UUID) {
 
 	delete(db.store, id)
 }
+
+func (db *Store) GetAllData() map[uuid.UUID]ItemData {
+	db.mu.Lock()
+	defer db.mu.Unlock()
+
+	return db.store
+}

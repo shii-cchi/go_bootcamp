@@ -11,7 +11,7 @@ import (
 
 func DoHeartbeat(cfg *config.ClientConfig, heartbeat *Heartbeat) {
 	connected := false
-	ticker := time.NewTicker(10 * time.Second)
+	ticker := time.NewTicker(heartbeatTick)
 
 	for range ticker.C {
 		res, err := http.Get(fmt.Sprintf("http://%s:%d/ping", cfg.Host, cfg.Port))
@@ -37,6 +37,10 @@ func DoHeartbeat(cfg *config.ClientConfig, heartbeat *Heartbeat) {
 func handleHeartbeatError(cfg *config.ClientConfig, heartbeat *Heartbeat) {
 	if len(heartbeat.NodesList) == 0 {
 		log.Fatalf("Node on port %d is not a leader", cfg.Port)
+	}
+
+	if len(heartbeat.NodesList) == 1 {
+		log.Fatal("There are no running nodes")
 	}
 
 	fmt.Printf("Leader on port %d is dead\nConnecting to follower on port %d\n", cfg.Port, heartbeat.NodesList[1].Port)

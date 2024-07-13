@@ -1,6 +1,7 @@
 package service
 
 import (
+	"github.com/google/uuid"
 	"net/http"
 	"team01/internal/server/repository"
 )
@@ -51,4 +52,10 @@ func DoRequest(reqData RequestData, store *repository.Store) ResponseData {
 	}
 
 	return resData
+}
+
+func GetStore(store *repository.Store) map[uuid.UUID]repository.ItemData {
+	allData := store.GetAllData()
+
+	return allData
 }

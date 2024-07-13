@@ -57,18 +57,26 @@ func handleResponse(res *http.Response, heartbeat *Heartbeat) {
 	if resBody.Error != "" {
 		fmt.Println(resBody.Error)
 	} else {
+		var countReplicas int
+
+		if len(heartbeat.NodesList) > heartbeat.ReplicationFactor {
+			countReplicas = heartbeat.ReplicationFactor
+		} else {
+			countReplicas = len(heartbeat.NodesList)
+		}
+
 		switch resBody.RequestType {
 		case "SET":
 			if resBody.Code == http.StatusCreated {
-				fmt.Println("Created" + fmt.Sprintf(" (%d replicas)", heartbeat.ReplicationFactor))
+				fmt.Println("Created" + fmt.Sprintf(" (%d replicas)", countReplicas))
 			} else {
-				fmt.Println("Updated" + fmt.Sprintf(" (%d replicas)", heartbeat.ReplicationFactor))
+				fmt.Println("Updated" + fmt.Sprintf(" (%d replicas)", countReplicas))
 			}
 
 		case "GET":
 			fmt.Println(resBody.ItemData)
 		case "DELETE":
-			fmt.Println("Deleted" + fmt.Sprintf(" (%d replicas)", heartbeat.ReplicationFactor))
+			fmt.Println("Deleted" + fmt.Sprintf(" (%d replicas)", countReplicas))
 		}
 	}
 }

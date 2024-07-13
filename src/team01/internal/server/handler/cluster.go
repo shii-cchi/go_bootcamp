@@ -1,10 +1,16 @@
 package handler
 
 import (
+	"encoding/json"
 	"fmt"
+	"github.com/google/uuid"
 	"team01/internal/server/config"
+	"team01/internal/server/repository"
 	"time"
 )
+
+const heartbeatTick = 1 * time.Second
+const heartbeatTimeout = 10 * time.Second
 
 type Cluster struct {
 	NodesList []Node `json:"nodes_list"`
@@ -17,7 +23,7 @@ func NewCluster() *Cluster {
 }
 
 func (c *Cluster) Monitor(cfg *config.ServerConfig) {
-	ticker := time.NewTicker(10 * time.Second)
+	ticker := time.NewTicker(heartbeatTick)
 	defer ticker.Stop()
 
 	for range ticker.C {
@@ -46,13 +52,40 @@ func (c *Cluster) AppendNode(node Node) {
 	c.PrintNodesList()
 }
 
+func (c *Cluster) SyncNewNode(node Node, allData map[uuid.UUID]repository.ItemData) error {
+	for key, value := range allData {
+		valueJSON, err := json.Marshal(value)
+		if err != nil {
+			return err
+		}
+
+		bodyStr := fmt.Sprintf("SET %s %s", key.String(), valueJSON)
+
+		body := RequestString{DbRequest: bodyStr}
+
+		bodyBytes, err := json.Marshal(body)
+
+		if err != nil {
+			return err
+		}
+
+		err = MakeReplication(node, bodyBytes)
+
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (c *Cluster) CheckFollowers() {
 	for i, node := range c.NodesList {
 		if node.Role == "Leader" {
 			continue
 		}
 
-		if time.Since(node.LastActive) > HeartbeatTimeout {
+		if time.Since(node.LastActive) > heartbeatTimeout {
 			fmt.Printf("Node on port %d is dead\n", node.Port)
 			c.NodesList = append(c.NodesList[:i], c.NodesList[i+1:]...)
 			c.PrintNodesList()
@@ -62,16 +95,16 @@ func (c *Cluster) CheckFollowers() {
 
 func (c *Cluster) isExistNode(node Node) bool {
 	if len(c.NodesList) == 0 {
-		return true
+		return false
 	}
 
 	for _, n := range c.NodesList {
 		if n.Port == node.Port {
-			return false
+			return true
 		}
 	}
 
-	return true
+	return false
 }
 
 func (c *Cluster) updateLastActive(node Node) {

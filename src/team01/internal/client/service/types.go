@@ -1,5 +1,9 @@
 package service
 
+import "time"
+
+const heartbeatTick = 1 * time.Second
+
 type RequestString struct {
 	DbRequest string `json:"db_request"`
 }

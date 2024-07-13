@@ -48,7 +48,7 @@ func ParseRequest(reqString string) (RequestData, error) {
 			return RequestData{}, errors.New("invalid request format: SET operation requires data")
 		}
 
-		err := json.NewDecoder(strings.NewReader(strings.Trim(parts[2], "'"))).Decode(&reqData.ItemData)
+		err = json.NewDecoder(strings.NewReader(strings.Trim(parts[2], "'"))).Decode(&reqData.ItemData)
 
 		if err != nil {
 			return RequestData{}, errors.New("invalid request format")

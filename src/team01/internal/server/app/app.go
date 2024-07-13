@@ -26,7 +26,7 @@ func RunServer() {
 	r := chi.NewRouter()
 
 	r.Post("/", handler.AllRequestsHandler(database, &cfg, cluster))
-	r.Post("/ping", handler.HeartbeatFromFollowersHandler(cluster))
+	r.Post("/ping", handler.HeartbeatFromFollowersHandler(database, cluster))
 	r.Get("/ping", handler.HeartbeatFromClientHandler(cluster))
 
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", cfg.CurrentPort), r))
